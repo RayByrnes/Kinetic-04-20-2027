@@ -319,6 +319,7 @@
         }catch(e){}
         return[];
     }
+    let currentSort = 'z';
     async function loadData(){
         document.getElementById('app').innerHTML='<div class="loading"><div class="spin"></div>Loading live data...</div>';
         const syms=[...FORCE,'^VIX',...FUTURES,...GLOBAL,...SECTORS];
@@ -383,7 +384,7 @@
         }
 
         // ── Sector scores using same calcZ engine ──
-        const sectorData = {};
+        window.sectorData = {};
         for (const t of SECTORS) {
             const arr = all[t] || [];
             const z = zsc(arr);
@@ -393,7 +394,7 @@
             const tileColor = z > 1.0 ? 'var(--green)' : z > 0 ? 'var(--amber)' : 'var(--red)';
             const grad = z > 1.0 ? 'var(--grad-accent)' : z > 0 ? 'var(--grad-recovery)' : 'var(--grad-danger)';
             const barW = Math.min(Math.max(Math.abs(z * 12) + 10, 8), 100);
-            sectorData[t] = { z, price, chg, state, tileColor, grad, barW };
+            window.sectorData[t] = { z, price, chg, state, tileColor, grad, barW };
         }
         const html=`
   <div class="regime-banner">
@@ -484,13 +485,13 @@
                 el.innerHTML = '';
                 const stateOrder = {'EXPANSION':0,'RECOVERY':1,'CAPITULATION':2};
                 const sorted = SECTORS.filter(t => SECTOR_MAP[t].group === group).sort((a,b) => {
-                    const da=sectorData[a], db=sectorData[b];
+                    const da=window.sectorData[a], db=window.sectorData[b];
                     if(currentSort==='chg') return db.chg - da.chg;
                     if(currentSort==='state') return stateOrder[da.state] - stateOrder[db.state];
                     return db.z - da.z;
                 });
                 sorted.forEach(t => {
-                    const d = sectorData[t];
+                    const d = window.sectorData[t];
                     const pctCls = d.chg >= 0 ? 'var(--green)' : 'var(--red)';
                     const arrow = d.chg >= 0 ? '▲' : '▼';
                     const tile = document.createElement('div');
@@ -529,13 +530,13 @@
             setTimeout(() => {
                 SECTORS.forEach(t => {
                     const bar = document.getElementById('sv-' + t);
-                    if (bar) bar.style.width = sectorData[t].barW + '%';
+                    if (bar) bar.style.width = window.sectorData[t].barW + '%';
                 });
             }, 120);
         }
         renderSectors();
 
-        let currentSort = 'z';
+        // currentSort is global
         function setSectorMode(m) {
             document.querySelectorAll('.sec-grid').forEach(g => g.classList.toggle('compact', m === 'compact'));
             document.getElementById('sec-std').classList.toggle('active', m === 'standard');
@@ -553,7 +554,7 @@
         // Sector price pulse
         const secPulse = setInterval(() => {
             const t = SECTORS[Math.floor(Math.random() * SECTORS.length)];
-            const d = sectorData[t];
+            const d = window.sectorData[t];
             if (!d) return;
             const move = (Math.random() - 0.5) * 0.2;
             d.price += move;
