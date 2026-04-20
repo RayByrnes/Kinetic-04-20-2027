@@ -155,6 +155,15 @@
     .cs-sub { font-size: 10px; color: var(--muted); margin-top: 2px }
 
 
+
+    /* ── TOOLTIPS ── */
+    .tip { position: relative; cursor: help; border-bottom: 1px dashed var(--muted) }
+    .tip::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
+        background: #1e242b; color: var(--text); font-size: 11px; font-weight: 400; line-height: 1.5;
+        padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border2); white-space: nowrap;
+        max-width: 260px; white-space: normal; width: max-content; max-width: 240px;
+        opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 999; letter-spacing: 0 }
+    .tip:hover::after { opacity: 1 }
     /* ── NAV SHELL ── */
     .nav-shell { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 24px; position: sticky; top: 57px; z-index: 98 }
     .nav-tab { padding: 10px 20px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: .2s; background: none; border-top: none; border-left: none; border-right: none }
@@ -339,7 +348,7 @@
         const stayP=vNow<18?94.7:vNow<25?68.0:42.0;
         const advP=vNow<18?5.3:vNow<25?32.0:58.0;
         const deploy=advP<10?'Full deployment':advP<30?'Half deployment':'Defensive';
-        document.getElementById('regime-pill').textContent=`${regime}  ${stayP}% stable`;
+        document.getElementById('regime-pill').textContent=`${regime}  |  Stable ${stayP}%`;
         const ph=getPhase();
         document.getElementById('phase-txt').textContent=ph.n;
         const now=new Date();
@@ -355,7 +364,10 @@
         function srow(t,s){
             const sc=s>0?'g':s<0?'r':'m';
             const{g,c}=grade(s);
-            return`<div class="crow"><div class="cleft"><span class="ctick">${t}</span><span class="cname">${NAMES[t]||t}</span></div><div class="cright"><span class="cval ${sc}">${s>0?'+':''}${s}</span><span class="gpill ${c}">${g}</span></div></div>`;
+            const action=s>2?'Deploy':s>1?'Watch+':s>0?'Watch':s>-2?'Avoid':'Avoid';
+            const ac=s>2?'g':s>0?'a':'r';
+            const tip=`Z-score ${s>0?'+':''}${s}: price momentum is ${Math.abs(s).toFixed(1)} standard deviations ${s>=0?'above':'below'} its recent average. ${s>2?'Strong signal — deploy capital.':s>1?'Positive momentum — watch for entry.':s>0?'Weak positive — monitor only.':s>-2?'Negative momentum — avoid new positions.':'Strong negative — consider hedge.'}`;
+            return`<div class="crow"><div class="cleft"><span class="ctick">${t}</span><span class="cname">${NAMES[t]||t}</span></div><div class="cright"><span class="cval ${sc} tip" data-tip="${tip}" style="cursor:help;border-bottom:1px dashed var(--muted)">${s>0?'+':''}${s}</span><span class="gpill ${c}">${g}</span><span class="gpill ${ac}" style="min-width:52px;text-align:center">${action}</span></div></div>`;
         }
         function grow(t,v){
             const pc=v>0.5?'gup':v<-0.5?'gdn':'gne';
@@ -370,9 +382,25 @@
             ['IWM vs SPY',(scores.IWM||0)-(scores.SPY||0)],
             ['HYG vs SPY',(scores.HYG||0)-(scores.SPY||0)],
         ].sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+        const DIV_TIPS = {
+            'Oil vs transports': 'Oil rising faster than transports signals energy cost pressure. Negative = transports outpacing oil — healthy growth signal.',
+            'XTN vs XLE': 'Transports vs Energy spread. Positive = transports leading — expansion signal. Negative = energy leading — inflationary pressure.',
+            'VIX vs SPY': 'Volatility vs equity spread. Negative = SPY stronger — risk-on, deploy. Positive = VIX rising faster — reduce exposure.',
+            'GLD vs VIX': 'Gold vs volatility spread. Positive = gold outpacing fear — macro uncertainty or dollar weakness signal.',
+            'IWM vs SPY': 'Small cap vs large cap spread. Positive = risk-on rotation — bull confirmation. Negative = flight to large cap safety.',
+            'HYG vs SPY': 'Credit vs equity spread. Positive = aligned risk appetite. Negative = credit weakening before equities — early warning.',
+        };
+        const DIV_ACTION = (l,v) => {
+            if(l==='VIX vs SPY') return v<-1?{a:'Risk-on',c:'g'}:v>1?{a:'Reduce',c:'r'}:{a:'Neutral',c:'gc'};
+            if(l==='HYG vs SPY') return v>0.5?{a:'Confirm',c:'g'}:v<-0.5?{a:'Warning',c:'r'}:{a:'Neutral',c:'gc'};
+            if(l==='IWM vs SPY') return v>0.5?{a:'Bull',c:'g'}:v<-0.5?{a:'Caution',c:'r'}:{a:'Neutral',c:'gc'};
+            return Math.abs(v)>3?{a:'Elevated',c:'gd'}:{a:'Normal',c:'gc'};
+        };
         function drow([l,v]){
-            const c=v>0?'g':'r',hi=Math.abs(v)>3;
-            return`<div class="divrow"><span class="cname">${l}</span><div style="display:flex;align-items:center;gap:7px"><span class="cval ${c}">${v>0?'+':''}${v.toFixed(2)}</span><span class="dtag ${hi?'h':'n'}">${hi?'High':'Normal'}</span></div></div>`;
+            const c=v>0?'g':'r';
+            const tip=DIV_TIPS[l]||'Cross-asset momentum divergence. High values signal potential rotation or stress.';
+            const {a,c:ac}=DIV_ACTION(l,v);
+            return`<div class="divrow"><span class="cname tip" data-tip="${tip}" style="cursor:help;border-bottom:1px dashed var(--muted)">${l}</span><div style="display:flex;align-items:center;gap:7px"><span class="cval ${c} tip" data-tip="Divergence score: ${v>0?'+':''}${v.toFixed(2)} standard deviation spread between the two assets." style="cursor:help;border-bottom:1px dashed var(--muted)">${v>0?'+':''}${v.toFixed(2)}</span><span class="gpill ${ac}" style="min-width:52px;text-align:center">${a}</span></div></div>`;
         }
         function tslot(time,name,note,cls,nc){
             return`<div class="ts ${cls}"><div class="ts-t">${time}</div><div class="ts-n ${nc}">${name}</div><div class="ts-d">${note}</div></div>`;
@@ -399,9 +427,9 @@
         const html=`
   <div class="regime-banner">
     <div class="rcard hero">
-      <div class="rlabel">Market regime  —  HMM</div>
+      <div class="rlabel"><span class="tip" data-tip="Hidden Markov Model — classifies market into Bull, Sideways, or Bear state based on VIX level and velocity.">Market Regime</span></div>
       <div class="rbig ${rCls}">${regime}</div>
-      <div class="rsub">Stay ${stayP}%  |  Adverse ${advP}%</div>
+      <div class="rsub">Stable ${stayP}%  |  Shift risk ${advP}%</div>
       <span class="badge ${rCls}">${deploy}</span>
       <div style="margin-top:12px">
         <div class="rrow"><span class="rrow-label">VIX level</span><span class="rv ${rCls}">${vNow}</span></div>
@@ -410,19 +438,19 @@
       </div>
     </div>
     <div class="rcard accent-green">
-      <div class="rlabel">Top longs  —  Z-score</div>
+      <div class="rlabel"><span class="tip" data-tip="Assets with strongest momentum. Thrust Z-score above +1.0 signals Expansion — prime deployment zone.">High Thrust</span></div>
       ${longs.slice(0,4).map(([t,s])=>`<div class="rrow"><span class="rv">${t}</span><span class="rrow-label">${NAMES[t]||t}</span><span class="rv g">+${s}</span></div>`).join('')}
     </div>
     <div class="rcard accent-red">
-      <div class="rlabel">Top shorts  —  Z-score</div>
-      ${shorts.slice(0,4).map(([t,s])=>`<div class="rrow"><span class="rv">${t}</span><span class="rrow-label">${NAMES[t]||t}</span><span class="rv r">${s}</span></div>`).join('')}
+      <div class="rlabel"><span class="tip" data-tip="Assets with weakest momentum. Thrust Z-score below -1.0 signals Capitulation — avoid or hedge.">Low Thrust</span></div>
+      ${shorts.length?shorts.slice(0,4).map(([t,s])=>`<div class="rrow"><span class="rv">${t}</span><span class="rrow-label">${NAMES[t]||t}</span><span class="rv r">${s}</span></div>`).join(''):'<div class="rrow"><span class="rrow-label" style="color:var(--muted);font-style:italic">No shorts — bull regime</span></div>'}
     </div>
     <div class="rcard accent-blue">
-      <div class="rlabel">Futures forward  —  layer 3</div>
+      <div class="rlabel"><span class="tip" data-tip="Layer 3: Futures velocity over 5 days. Leading indicator of institutional positioning ahead of equity open.">Futures Forward</span></div>
       ${Object.entries(futV).map(([t,v])=>`<div class="rrow"><span class="rrow-label">${NAMES[t]||t}</span><span class="rv ${v>0?'g':v<0?'r':'m'}">${v>0?'+':''}${v}%</span></div>`).join('')}
     </div>
     <div class="rcard accent-amber">
-      <div class="rlabel">Timing  —  Pacific time</div>
+      <div class="rlabel"><span class="tip" data-tip="Layer 7: Time-of-day protocol. Avoid first 15 min. Best entries: 06:45-07:15 PT and 11:30-13:00 PT.">Timing  —  Pacific</span></div>
       <div class="rbig a" style="font-size:17px">${ph.n}</div>
       <div class="rsub">${ph.a}</div>
       <div style="margin-top:10px">
@@ -433,13 +461,13 @@
     </div>
   </div>
   <div class="main">
-    <div class="card"><div class="ch"><span class="ct">Signal grades  —  layer 1</span><span class="badge n">Z-score  inv-vol</span></div><div class="cb">${sorted.map(([t,s])=>srow(t,s)).join('')}</div></div>
-    <div class="card"><div class="ch"><span class="ct">Divergences  —  layer 2</span><span class="badge n">Cross-asset</span></div><div class="cb">${divs.map(drow).join('')}</div></div>
-    <div class="card"><div class="ch"><span class="ct">Global pre-signal  —  layer 4</span><span class="badge n">1-day velocity</span></div><div class="cb">${Object.entries(globV).sort((a,b)=>b[1]-a[1]).map(([t,v])=>grow(t,v)).join('')}</div></div>
+    <div class="card"><div class="ch"><span class="ct"><span class="tip" data-tip="Force model z-scores graded A–F. A/B = strong momentum, deploy. C = neutral. D/F = weakening, avoid.">Signal Grades</span></span><span class="badge n">Z-score</span></div><div class="cb">${sorted.map(([t,s])=>srow(t,s)).join('')}</div></div>
+    <div class="card"><div class="ch"><span class="ct"><span class="tip" data-tip="Cross-asset divergences: differences in z-scores between related assets. High divergence signals potential rotation or stress.">Divergences</span></span><span class="badge n">Cross-asset</span></div><div class="cb">${divs.map(drow).join('')}</div></div>
+    <div class="card"><div class="ch"><span class="ct">Global Pre-Signal</span><span class="badge n">Overnight velocity</span></div><div class="cb">${Object.entries(globV).sort((a,b)=>b[1]-a[1]).map(([t,v])=>grow(t,v)).join('')}</div></div>
   </div>
   <div class="main2">
     <div class="card">
-      <div class="ch"><span class="ct">Timing protocol  —  layer 7  |  Pacific time</span><span class="badge n">VIX vel ${vVel>0?'+':''}${vVel}%</span></div>
+      <div class="ch"><span class="ct">Timing Protocol  —  Pacific</span><span class="badge n">VIX vel ${vVel>0?'+':''}${vVel}%</span></div>
       <div class="time-grid">
         ${tslot('05:00–06:30 PT','Premarket','Check ES NQ CL','','')}
         ${tslot('06:30–06:45 PT','Avoid','Do NOT trade','dng','r')}
@@ -464,7 +492,7 @@
     </div>
   </div>
   <div class="fullcard">
-    <div class="ch"><span class="ct">Monday conviction table  —  all 7 layers  |  auto-generated  |  live</span><span class="badge n">Min 3 of 7 required</span></div>
+    <div class="ch"><span class="ct"><span class="tip" data-tip="Conviction table synthesizes all 7 model layers. Long = momentum positive across layers. Short = momentum negative. Wait/Caution = conflicting signals.">Conviction Table  —  Auto-generated  |  Live</span></span><span class="badge n">Min 3 of 7 required</span></div>
     ${longs.slice(0,4).map(([t,s])=>cconv(t,'Long',`Force ${grade(s).g}  |  Z-score +${s}  |  ${NAMES[t]}  |  HMM ${regime}`,`${Math.min(Math.floor(s)+3,7)}/7`,s>3)).join('')}
     ${shorts.slice(0,3).map(([t,s])=>cconv(t,'Short',`Force ${grade(s).g}  |  Z-score ${s}  |  ${NAMES[t]}  |  Options bearish`,`${Math.min(Math.floor(Math.abs(s))+3,7)}/7`,Math.abs(s)>3)).join('')}
     ${cconv('GLD','Wait','Options conflicted  |  Put premium vs bullish P/C  |  Two competing forces','conflict',false)}
@@ -520,7 +548,7 @@
                         </div>
                         <div class="sec-vec-track"><div class="sec-vec-fill" id="sv-${t}" style="background:${d.grad}"></div></div>
                         <div class="sec-thrust-val" style="color:${d.tileColor}">${d.z > 0 ? '+' : ''}${d.z}</div>
-                        <div class="sec-thrust-lbl">Thrust Index</div>
+                        <div class="sec-thrust-lbl"><span class="tip" data-tip="Thrust Index = Z-score of price velocity + acceleration + jerk (30/36/34% weights). Above +1.0 = Expansion. Above 0 = Recovery. Below 0 = Capitulation.">Thrust Index</span></div>
                         <div class="sec-badge" style="border-bottom:3px solid ${d.tileColor};color:${d.tileColor}">${d.state}</div>
                         <div class="sec-tile-accent" style="background:${d.grad}"></div>
                     `;
@@ -573,7 +601,7 @@
     <!-- SECTOR PANEL - static, outside #app -->
     <div id="panel-sectors" class="sec-wrap" style="display:none;padding-top:16px">
       <div class="sec-controls">
-        <span style="font-size:10px;font-weight:800;letter-spacing:3px;color:var(--muted);text-transform:uppercase">Sector Rotation Map  —  Layer 5</span>
+        <span style="font-size:10px;font-weight:800;letter-spacing:3px;color:var(--muted);text-transform:uppercase">Sector Rotation Map</span>
         <div style="display:flex;gap:6px;align-items:center">
           <span style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-right:4px">Sort</span>
           <button class="sec-btn active" id="sort-z" onclick="setSectorSort('z')">Z-Score</button>
@@ -744,7 +772,7 @@
         }).join('');
         out.innerHTML=summary+`<div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border2)">
             <table class="ctable">
-                <thead><tr><th>#</th><th>Ticker</th><th>Grade</th><th>Z-score</th><th>Vel 5d</th><th>Accel</th><th>Jerk</th><th>RS 20d</th><th>50MA</th><th>20H</th><th>Turtle</th><th>Size</th><th>Volume</th></tr></thead>
+                <thead><tr><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Rank by z-score. #1 = strongest momentum signal in this comparison.">#</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Stock symbol and company name.">Ticker</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Force model grade A-F. A/B = strong momentum, deploy. C = watch. D/F = avoid.">Grade</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Thrust index: velocity + acceleration + jerk of price momentum. Above +1.0 = Expansion. Above 0 = Recovery. Below 0 = Capitulation.">Z-score</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="5-day price velocity — % move over last 5 trading days. Positive = upward momentum.">Vel 5d</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Acceleration — is momentum speeding up or slowing down? Positive = gaining thrust. Negative = losing thrust.">Accel</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Rate of change of acceleration. Positive = acceleration itself is increasing. Key early warning signal.">Jerk</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="20-day relative strength — % move over last 20 trading days vs recent baseline.">RS 20d</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Is price above the 50-day moving average? Yes = uptrend confirmed. No = below trend, caution.">50MA</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Is price above the 20-day high? Yes = breakout confirmed — Turtle entry signal.">20H</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Turtle system: requires above 50MA + above 20-day high + Z-score above +1.0. All three must pass.">Turtle</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Recommended position size. Prime 5% = full position. Good 3% = reduced. Watch 1% = scout only.">Size</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Volume vs 20-day average. Surge = 25%+ above average — institutional participation likely.">Volume</th></tr></thead>
                 <tbody>${rows}</tbody>
             </table></div>`;
     }
