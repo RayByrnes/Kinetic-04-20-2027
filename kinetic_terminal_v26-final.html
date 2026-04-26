@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <title>KINETIC // STRATEGIC TERMINAL</title>
+    <title>KINETIC // MARKET INTELLIGENCE TERMINAL</title>
     <style>
     * { box-sizing: border-box; margin: 0; padding: 0 }
     :root {
@@ -19,7 +19,7 @@
     }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px; overflow-x: hidden }
     
-    /* TERMINAL HEADER */
+    /* HEADER STRUCTURE */
     .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 100 }
     .logo { font-weight: 900; letter-spacing: 2px; font-size: 18px; display: flex; align-items: center; gap: 10px }
     .logo span { color: var(--green) }
@@ -27,14 +27,14 @@
     .status-pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 6px 14px; font-size: 10px; font-weight: 800; color: var(--muted); display: flex; align-items: center; gap: 8px; letter-spacing: 1px }
     .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green) }
 
-    /* CARD GRID SYSTEM */
+    /* GRID SYSTEM */
     .terminal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; padding: 24px }
     .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4) }
     .ch { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02) }
     .ct { font-size: 10px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px }
     .cb { padding: 8px 20px 20px }
 
-    /* DATA ROWS & PHYSICS LAYER */
+    /* DATA ROWS */
     .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border) }
     .row:last-child { border: none }
     .sym { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 15px }
@@ -50,74 +50,30 @@
 
 <div class="header">
     <div class="logo">KINETIC <span>//</span> 2.0</div>
-    <div class="status-pill"><span class="status-dot"></span><span id="system-phase">SYSTEM ONLINE</span></div>
+    <div class="status-pill"><span class="status-dot"></span><span id="market-phase">SYSTEM ONLINE</span></div>
 </div>
 
 <div class="terminal-grid">
     <div class="card">
-        <div class="ch"><span class="ct">Market Velocity // 5D</span></div>
-        <div class="cb" id="macro-list"><div class="row"><span>Initializing...</span></div></div>
+        <div class="ch"><span class="ct">Macro Velocity // 5D</span></div>
+        <div class="cb" id="macro-list">
+            <div class="row"><span>Synchronizing Physics...</span></div>
+        </div>
     </div>
 
     <div class="card">
         <div class="ch"><span class="ct">Sector Momentum // Acceleration</span></div>
-        <div class="cb" id="sector-list"><div class="row"><span>Initializing...</span></div></div>
+        <div class="cb" id="sector-list">
+            <div class="row"><span>Synchronizing Physics...</span></div>
+        </div>
     </div>
 
     <div class="card">
-        <div class="ch"><span class="ct">Volatility & Pressure</span></div>
-        <div class="cb" id="risk-list"><div class="row"><span>Initializing...</span></div></div>
+        <div class="ch"><span class="ct">Systemic Volatility // Pressure</span></div>
+        <div class="cb" id="risk-list">
+            <div class="row"><span>Synchronizing Physics...</span></div>
+        </div>
     </div>
 </div>
 
 <script>
-    const CONFIG = {
-        macro: ['SPY', 'QQQ', 'IWM', 'DIA'],
-        sectors: ['XLK', 'XLF', 'XLE', 'XLV', 'XLI', 'XLY'],
-        risk: ['VIX', 'TNX', 'DXY', 'GLD']
-    };
-
-    async function fetchPhysics(sym) {
-        try {
-            const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`);
-            const d = await r.json();
-            const p = d.chart.result[0].indicators.quote[0].close.filter(x => x != null);
-            
-            // Physics logic
-            const v = ((p[p.length-1]-p[p.length-5])/p[p.length-5]*100);
-            const prevV = ((p[p.length-2]-p[p.length-6])/p[p.length-6]*100);
-            const a = v - prevV;
-            
-            return { sym, v: v.toFixed(2), a: a.toFixed(2) };
-        } catch (e) { return null; }
-    }
-
-    async function render(id, list) {
-        const container = document.getElementById(id);
-        let html = '';
-        for (const s of list) {
-            const d = await fetchPhysics(s);
-            if (!d) continue;
-            html += `
-                <div class="row">
-                    <span class="sym">${s}</span>
-                    <div style="display:flex; align-items:center; gap:12px">
-                        <span class="val ${d.v>=0?'up':'dn'}">${d.v}%</span>
-                        <span class="badge ${d.a>=0?'bg-up':'bg-dn'}">${d.a > 0 ? 'ACCEL' : 'DECEL'}</span>
-                    </div>
-                </div>`;
-        }
-        container.innerHTML = html;
-    }
-
-    function init() {
-        render('macro-list', CONFIG.macro);
-        render('sector-list', CONFIG.sectors);
-        render('risk-list', CONFIG.risk);
-    }
-
-    init();
-    setInterval(init, 60000); // Auto-refresh every minute
-</script>
-</body>
-</html>
