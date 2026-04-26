@@ -8,23 +8,15 @@
     <style>
         :root { --bg: #0b0e11; --surface: #14171a; --green: #00ffaa; --red: #ff3355; --border: #2d333b; --muted: #707a8a; }
         body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 24px; overflow-x: hidden; }
-        
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; }
         .logo { font-weight: 900; letter-spacing: 2px; font-size: 18px; }
-        
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
-        
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; position: relative; transition: 0.3s; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; position: relative; }
         .label { font-size: 10px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; display: block; }
-        
-        /* Gradient Row Logic */
-        .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; margin: 4px -10px; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; transition: 0.2s ease; }
-        .row:hover { background: rgba(255,255,255,0.05); }
-        
-        /* Slider Styling */
+        .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; margin: 4px -10px; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; transition: all 0.3s ease; border-left: 3px solid transparent; }
         .controls { margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px; }
-        input[type=range] { width: 100%; cursor: pointer; accent-color: var(--green); background: #2d333b; height: 4px; border-radius: 2px; appearance: none; }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: var(--green); }
         .slider-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); margin-top: 8px; font-weight: 700; }
     </style>
 </head>
@@ -32,7 +24,7 @@
 
     <div class="header">
         <div class="logo">KINETIC <span style="color:var(--green)">//</span> 2.1</div>
-        <div id="status" style="font-size: 10px; color: var(--green);">SYSTEM_ACTIVE</div>
+        <div id="status" style="font-size: 10px; color: var(--muted);">INITIALIZING...</div>
     </div>
 
     <div class="grid">
@@ -42,11 +34,7 @@
             <div id="s"></div>
             <div class="controls">
                 <input type="range" id="filterSlider" min="-1" max="1" step="0.1" value="0">
-                <div class="slider-labels">
-                    <span>FOCUS: RED</span>
-                    <span>NEUTRAL</span>
-                    <span>FOCUS: GREEN</span>
-                </div>
+                <div class="slider-labels"><span>BEARISH</span><span>NEUTRAL</span><span>BULLISH</span></div>
             </div>
         </div>
         <div class="card"><span class="label">Risk Pressure</span><div id="r"></div></div>
@@ -54,62 +42,68 @@
 
     <script>
         const syms = { 
-            m: ['SPY', 'QQQ', 'IWM', 'DIA'], 
-            s: ['XLK', 'XLE', 'XLF', 'XLV', 'XLI', 'XLY'], 
-            r: ['VIX', 'TNX', 'DXY', 'BTC-USD'] 
+            m: ['SPY', 'QQQ', 'IWM'], 
+            s: ['XLK', 'XLE', 'XLF', 'XLV', 'XLI', 'XLY', 'XLU'], 
+            r: ['VIX', 'TNX', 'DXY'] 
         };
 
-        async function fetchData(s) {
-            try {
-                const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=5d`);
-                const data = await response.json();
-                const prices = data.chart.result[0].indicators.quote[0].close.filter(p => p != null);
-                const change = ((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(2);
-                
-                // Active Gradient Background Calculation
-                const opacity = Math.min(Math.abs(change) / 5, 0.3); // Caps intensity at 5% move
-                const bgColor = change >= 0 ? `rgba(0, 255, 170, ${opacity})` : `rgba(255, 51, 85, ${opacity})`;
-                
-                return `
-                    <div class="row" data-val="${change}" style="border-left: 3px solid ${change >= 0 ? 'var(--green)' : 'var(--red)'}; background: ${bgColor};">
-                        <span>${s}</span>
-                        <span style="color: ${change >= 0 ? 'var(--green)' : 'var(--red)'}; font-weight:700;">${change}%</span>
-                    </div>`;
-            } catch (e) { return ''; }
-        }
-
-        async function init() {
+        async function updateTerminal() {
+            document.getElementById('status').innerText = 'FETCHING_DATA...';
+            
             for (const key in syms) {
                 const container = document.getElementById(key);
                 let html = '';
                 for (const ticker of syms[key]) {
-                    html += await fetchData(ticker);
+                    try {
+                        const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`);
+                        const d = await r.json();
+                        const p = d.chart.result[0].indicators.quote[0].close.filter(x => x != null);
+                        const val = ((p[p.length - 1] - p[0]) / p[0] * 100).toFixed(2);
+                        
+                        const color = val >= 0 ? 'var(--green)' : 'var(--red)';
+                        const op = Math.min(Math.abs(val) / 5, 0.25);
+                        const bg = val >= 0 ? `rgba(0, 255, 170, ${op})` : `rgba(255, 51, 85, ${op})`;
+
+                        html += `<div class="row" data-val="${val}" style="border-left-color: ${color}; background: ${bg};">
+                                    <span>${ticker}</span>
+                                    <span style="color: ${color}; font-weight:700;">${val}%</span>
+                                 </div>`;
+                    } catch(e) { console.error(e); }
                 }
                 container.innerHTML = html;
             }
+            document.getElementById('status').innerText = 'SYSTEM_ACTIVE';
+            document.getElementById('status').style.color = 'var(--green)';
         }
 
-        // Slider Filtering Logic
-        document.getElementById('filterSlider').addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
+        // UNIFIED SLIDER LOGIC
+        const slider = document.getElementById('filterSlider');
+        slider.addEventListener('input', () => {
+            const val = parseFloat(slider.value);
             const rows = document.querySelectorAll('#s .row');
             
             rows.forEach(row => {
-                const change = parseFloat(row.getAttribute('data-val'));
-                if (val > 0.3) { // Show only Green
-                    row.style.opacity = change > 0 ? "1" : "0.1";
-                    row.style.transform = change > 0 ? "scale(1)" : "scale(0.95)";
-                } else if (val < -0.3) { // Show only Red
-                    row.style.opacity = change < 0 ? "1" : "0.1";
-                    row.style.transform = change < 0 ? "scale(1)" : "scale(0.95)";
-                } else { // Show all
+                const rowVal = parseFloat(row.getAttribute('data-val'));
+                // Neutral Zone (-0.2 to 0.2) shows everything
+                if (Math.abs(val) < 0.2) {
                     row.style.opacity = "1";
-                    row.style.transform = "scale(1)";
+                    row.style.filter = "grayscale(0%)";
+                } 
+                // Focus Green
+                else if (val >= 0.2) {
+                    row.style.opacity = rowVal > 0 ? "1" : "0.1";
+                    row.style.filter = rowVal > 0 ? "grayscale(0%)" : "grayscale(100%)";
+                } 
+                // Focus Red
+                else if (val <= -0.2) {
+                    row.style.opacity = rowVal < 0 ? "1" : "0.1";
+                    row.style.filter = rowVal < 0 ? "grayscale(0%)" : "grayscale(100%)";
                 }
             });
         });
 
-        init();
+        // Run on load
+        updateTerminal();
     </script>
 </body>
 </html>
