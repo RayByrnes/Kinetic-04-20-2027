@@ -21,7 +21,7 @@
     }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px; overflow-x: hidden }
     
-    /* TOPBAR LOGIC */
+    /* TOPBAR RESTORATION */
     .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 100 }
     .logo-box { display: flex; align-items: center; gap: 10px }
     .logo-icon { width: 32px; height: 32px; background: #1a1e23; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 6px }
@@ -31,7 +31,7 @@
     .pill.active { border-color: rgba(0,255,170,0.3); color: var(--green); background: rgba(0,255,170,0.06) }
     .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
 
-    /* MAIN LAYOUT */
+    /* GRID LAYOUT */
     .terminal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; padding: 16px 24px }
     .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden }
     .ch { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center }
@@ -73,23 +73,23 @@
 
 <div class="terminal-grid">
     <div class="card">
-        <div class="ch"><span class="ct">Macro Velocity (Physics Layer)</span></div>
+        <div class="ch"><span class="ct">Macro Velocity</span></div>
         <div class="cb" id="macro-list">
-            <div class="row"><span>ANALYZING...</span></div>
+            <div class="row"><span>Initializing Physics...</span></div>
         </div>
     </div>
 
     <div class="card">
         <div class="ch"><span class="ct">Sector Relative Strength</span></div>
         <div class="cb" id="sector-list">
-            <div class="row"><span>ANALYZING...</span></div>
+            <div class="row"><span>Initializing Physics...</span></div>
         </div>
     </div>
 
     <div class="card">
         <div class="ch"><span class="ct">Volatility & Pressure</span></div>
         <div class="cb" id="risk-list">
-            <div class="row"><span>ANALYZING...</span></div>
+            <div class="row"><span>Initializing Physics...</span></div>
         </div>
     </div>
 </div>
@@ -118,13 +118,12 @@
             const d = await r.json();
             const p = d.chart.result[0].indicators.quote[0].close.filter(x => x != null);
             
-            // Physics logic (Velocity/Acceleration/Jerk)
+            // Kinetic Physics Layer (5-Day Velocity / Acceleration)
             const v = ((p[p.length-1]-p[p.length-5])/p[p.length-5]*100);
             const prevV = ((p[p.length-2]-p[p.length-6])/p[p.length-6]*100);
             const a = v - prevV;
-            const jerk = a - (prevV - ((p[p.length-3]-p[p.length-7])/p[p.length-7]*100));
             
-            return { sym, v: v.toFixed(2), a: a.toFixed(2), j: jerk.toFixed(2) };
+            return { sym, v: v.toFixed(2), a: a.toFixed(2) };
         } catch (e) { return null; }
     }
 
@@ -134,12 +133,11 @@
         for (const sym of list) {
             const data = await fetchPhysics(sym);
             if (!data) continue;
-            const isUp = data.v >= 0;
             html += `
                 <div class="row">
                     <span class="sym">${sym}</span>
                     <div style="display:flex; align-items:center; gap:8px">
-                        <span class="val ${isUp?'up':'dn'}">${data.v}%</span>
+                        <span class="val ${data.v>=0?'up':'dn'}">${data.v}%</span>
                         <span class="physics ${data.a>=0?'bg-up':'bg-dn'}">${data.a > 0 ? 'ACCEL' : 'DECEL'}</span>
                     </div>
                 </div>`;
@@ -149,9 +147,9 @@
 
     async function init() {
         document.getElementById('market-phase').innerText = getMarketPhase();
-        await renderSection('macro-list', CONFIG.macro);
-        await renderSection('sector-list', CONFIG.sectors);
-        await renderSection('risk-list', CONFIG.risk);
+        renderSection('macro-list', CONFIG.macro);
+        renderSection('sector-list', CONFIG.sectors);
+        renderSection('risk-list', CONFIG.risk);
     }
 
     init();
