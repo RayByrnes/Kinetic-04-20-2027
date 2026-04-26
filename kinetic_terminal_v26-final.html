@@ -4,17 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <title>KINETIC // TERMINAL</title>
+    <title>KINETIC // HEATMAP</title>
     <style>
         :root { --bg: #0b0e11; --surface: #14171a; --green: #00ffaa; --red: #ff3355; --border: #2d333b; --muted: #707a8a; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 24px; overflow-x: hidden; }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 24px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; }
-        .logo { font-weight: 900; letter-spacing: 2px; font-size: 18px; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; position: relative; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
         .label { font-size: 10px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; display: block; }
-        .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; margin: 4px -10px; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; transition: all 0.3s ease; border-left: 3px solid transparent; }
+        
+        /* HEAT MAP GRID STYLE */
+        .heatmap-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .map-cell { 
+            padding: 15px; 
+            border-radius: 6px; 
+            text-align: center; 
+            font-family: 'IBM Plex Mono', monospace; 
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .ticker { display: block; font-weight: 700; font-size: 14px; }
+        .pct { display: block; font-size: 11px; margin-top: 4px; opacity: 0.9; }
+
+        /* SLIDER STYLE */
         .controls { margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px; }
         input[type=range] { width: 100%; cursor: pointer; accent-color: var(--green); }
         .slider-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); margin-top: 8px; font-weight: 700; }
@@ -23,52 +36,52 @@
 <body>
 
     <div class="header">
-        <div class="logo">KINETIC <span style="color:var(--green)">//</span> 2.1</div>
-        <div id="status" style="font-size: 10px; color: var(--muted);">INITIALIZING...</div>
+        <div style="font-weight:900; letter-spacing:2px;">KINETIC <span style="color:var(--green)">//</span> 2.2</div>
+        <div id="status" style="font-size: 10px; color: var(--muted);">SYSTEM_READY</div>
     </div>
 
     <div class="grid">
-        <div class="card"><span class="label">Macro Velocity</span><div id="m"></div></div>
+        <div class="card"><span class="label">Macro</span><div id="m" class="heatmap-container"></div></div>
         <div class="card">
-            <span class="label">Sector Momentum</span>
-            <div id="s"></div>
+            <span class="label">Sector Heat Map</span>
+            <div id="s" class="heatmap-container"></div>
             <div class="controls">
                 <input type="range" id="filterSlider" min="-1" max="1" step="0.1" value="0">
-                <div class="slider-labels"><span>BEARISH</span><span>NEUTRAL</span><span>BULLISH</span></div>
+                <div class="slider-labels"><span>FOCUS: RED</span><span>NEUTRAL</span><span>FOCUS: GREEN</span></div>
             </div>
         </div>
-        <div class="card"><span class="label">Risk Pressure</span><div id="r"></div></div>
+        <div class="card"><span class="label">Risk</span><div id="r" class="heatmap-container"></div></div>
     </div>
 
     <script>
         const syms = { 
-            m: ['SPY', 'QQQ', 'IWM'], 
-            s: ['XLK', 'XLE', 'XLF', 'XLV', 'XLI', 'XLY', 'XLU'], 
-            r: ['VIX', 'TNX', 'DXY'] 
+            m: ['SPY', 'QQQ', 'IWM', 'DIA'], 
+            s: ['XLK', 'XLE', 'XLF', 'XLV', 'XLI', 'XLY'], 
+            r: ['VIX', 'TNX', 'DXY', 'BTC-USD'] 
         };
 
         async function updateTerminal() {
-            document.getElementById('status').innerText = 'FETCHING_DATA...';
-            
             for (const key in syms) {
                 const container = document.getElementById(key);
                 let html = '';
                 for (const ticker of syms[key]) {
                     try {
-                        const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`);
-                        const d = await r.json();
-                        const p = d.chart.result[0].indicators.quote[0].close.filter(x => x != null);
+                        const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=5d`);
+                        const data = await res.json();
+                        const p = data.chart.result[0].indicators.quote[0].close.filter(x => x != null);
                         const val = ((p[p.length - 1] - p[0]) / p[0] * 100).toFixed(2);
                         
-                        const color = val >= 0 ? 'var(--green)' : 'var(--red)';
-                        const op = Math.min(Math.abs(val) / 5, 0.25);
-                        const bg = val >= 0 ? `rgba(0, 255, 170, ${op})` : `rgba(255, 51, 85, ${op})`;
+                        // Heat Map Intensity Logic
+                        const intensity = Math.min(Math.abs(val) / 4, 0.6); // Cap color at 4% move
+                        const color = val >= 0 ? `rgba(0, 255, 170, ${intensity + 0.1})` : `rgba(255, 51, 85, ${intensity + 0.1})`;
+                        const txtColor = Math.abs(val) > 1.5 ? '#000' : '#fff'; // Flip text to black if background is bright
 
-                        html += `<div class="row" data-val="${val}" style="border-left-color: ${color}; background: ${bg};">
-                                    <span>${ticker}</span>
-                                    <span style="color: ${color}; font-weight:700;">${val}%</span>
-                                 </div>`;
-                    } catch(e) { console.error(e); }
+                        html += `
+                            <div class="map-cell" data-val="${val}" style="background: ${color}; color: ${txtColor};">
+                                <span class="ticker">${ticker}</span>
+                                <span class="pct">${val}%</span>
+                            </div>`;
+                    } catch(e) { console.error(ticker, e); }
                 }
                 container.innerHTML = html;
             }
@@ -76,33 +89,26 @@
             document.getElementById('status').style.color = 'var(--green)';
         }
 
-        // UNIFIED SLIDER LOGIC
+        // SLIDER FILTER LOGIC
         const slider = document.getElementById('filterSlider');
         slider.addEventListener('input', () => {
             const val = parseFloat(slider.value);
-            const rows = document.querySelectorAll('#s .row');
+            const cells = document.querySelectorAll('#s .map-cell');
             
-            rows.forEach(row => {
-                const rowVal = parseFloat(row.getAttribute('data-val'));
-                // Neutral Zone (-0.2 to 0.2) shows everything
-                if (Math.abs(val) < 0.2) {
-                    row.style.opacity = "1";
-                    row.style.filter = "grayscale(0%)";
+            cells.forEach(cell => {
+                const rowVal = parseFloat(cell.getAttribute('data-val'));
+                if (Math.abs(val) < 0.2) { cell.style.opacity = "1"; cell.style.filter = "grayscale(0%)"; } 
+                else if (val >= 0.2) { 
+                    cell.style.opacity = rowVal > 0 ? "1" : "0.1"; 
+                    cell.style.filter = rowVal > 0 ? "grayscale(0%)" : "grayscale(100%)";
                 } 
-                // Focus Green
-                else if (val >= 0.2) {
-                    row.style.opacity = rowVal > 0 ? "1" : "0.1";
-                    row.style.filter = rowVal > 0 ? "grayscale(0%)" : "grayscale(100%)";
-                } 
-                // Focus Red
-                else if (val <= -0.2) {
-                    row.style.opacity = rowVal < 0 ? "1" : "0.1";
-                    row.style.filter = rowVal < 0 ? "grayscale(0%)" : "grayscale(100%)";
+                else if (val <= -0.2) { 
+                    cell.style.opacity = rowVal < 0 ? "1" : "0.1"; 
+                    cell.style.filter = rowVal < 0 ? "grayscale(0%)" : "grayscale(100%)";
                 }
             });
         });
 
-        // Run on load
         updateTerminal();
     </script>
 </body>
