@@ -23,53 +23,31 @@
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px }
     button { font-family: inherit; cursor: pointer }
     
-    /* TOPBAR */
     .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 99 }
     .logo-box { display: flex; align-items: center; gap: 10px }
     .logo-icon { width: 32px; height: 32px; background: #1a1e23; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 6px }
-    .logo-text { display: flex; flex-direction: column; line-height: 1 }
-    .logo-text b { font-size: 16px; font-weight: 900; letter-spacing: 2px; color: #fff }
-    .logo-text span { font-size: 9px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase }
     
-    .top-pills { display: flex; gap: 8px; align-items: center }
-    .pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 11px; font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px }
-    .pill.ok { border-color: rgba(0,255,170,0.3); color: var(--green); background: rgba(0,255,170,0.06) }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
-
-    /* NAV */
     .nav-shell { display: flex; background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 24px; position: sticky; top: 57px; z-index: 98 }
     .nav-tab { padding: 14px 20px; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; transition: .2s }
     .nav-tab.active { color: var(--green); border-bottom-color: var(--green) }
 
-    /* LAYOUT */
     .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; padding: 16px 24px }
     .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden }
     .ch { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center }
     .ct { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px }
     .cb { padding: 8px 16px 16px }
 
-    /* SECTORS */
-    .sec-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) }
-    .sec-tile { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 16px; position: relative }
-    .sec-sym { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 700 }
-    .sec-thrust { font-size: 24px; font-weight: 900; margin: 8px 0 }
-    .sec-vec-track { height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; margin: 10px 0 }
-    .sec-vec-fill { height: 100%; border-radius: 2px; transition: width 1s ease }
+    /* HEATMAP STYLES */
+    .heat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 4px; padding: 10px }
+    .heat-cell { height: 80px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; transition: transform 0.2s }
+    .heat-cell:hover { transform: scale(1.05); z-index: 2; cursor: pointer }
+    .heat-sym { font-size: 14px; margin-bottom: 4px }
+    .heat-val { font-size: 10px; opacity: 0.8 }
 
-    /* SCORER */
-    .scorer-input-wrap { display: flex; gap: 10px; margin-bottom: 16px }
-    .ticker-in { flex: 1; background: #0b0e11; border: 1.5px solid var(--green); border-radius: 8px; padding: 10px; color: var(--green); font-family: 'IBM Plex Mono'; font-weight: 700; text-transform: uppercase }
-    .btn-action { background: var(--green); color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: 700 }
-    
-    .ctable { width: 100%; border-collapse: collapse }
-    .ctable th { text-align: left; font-size: 9px; color: var(--muted); padding: 8px; border-bottom: 1px solid var(--border) }
-    .ctable td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03) }
-
+    .hidden { display: none }
     .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px }
     .g { color: var(--green); background: rgba(0,255,170,0.1) }
     .r { color: var(--red); background: rgba(255,51,85,0.1) }
-
-    .hidden { display: none }
     </style>
 </head>
 <body>
@@ -81,77 +59,65 @@
             <div style="width:4px;height:18px;background:#4ba1ff;border-radius:1px"></div>
             <div style="width:4px;height:24px;background:#00ffaa;border-radius:1px"></div>
         </div>
-        <div class="logo-text">
-            <b>KINETIC</b>
-            <span>Intelligence Terminal</span>
+        <div style="display:flex;flex-direction:column;line-height:1">
+            <b style="font-size:16px;letter-spacing:2px">KINETIC</b>
+            <span style="font-size:9px;color:var(--muted);text-transform:uppercase">Intelligence Terminal</span>
         </div>
     </div>
-    <div class="top-pills">
-        <div class="pill ok"><span class="dot"></span><span id="regime-status">Analyzing Regime...</span></div>
-        <button class="btn-action" style="padding: 5px 12px; font-size: 11px" onclick="init()">Refresh</button>
-    </div>
+    <div id="regime-status" class="badge g">Analyzing...</div>
 </div>
 
 <nav class="nav-shell">
     <button class="nav-tab active" onclick="tab('macro')">Macro</button>
     <button class="nav-tab" onclick="tab('sectors')">Sectors</button>
+    <button class="nav-tab" onclick="tab('heatmap')">Heat Map</button>
     <button class="nav-tab" onclick="tab('compare')">Compare</button>
 </nav>
 
 <div id="view-macro" class="main-grid">
     <div class="card">
-        <div class="ch"><span class="ct">Cross-Asset Velocity</span></div>
+        <div class="ch"><span class="ct">Market Velocity</span></div>
         <div class="cb" id="macro-list">Loading...</div>
-    </div>
-    <div class="card">
-        <div class="ch"><span class="ct">Kinetic Divergence</span></div>
-        <div class="cb" id="div-list">Scanning spreads...</div>
     </div>
 </div>
 
 <div id="view-sectors" class="main-grid hidden">
-    <div class="sec-grid" id="sector-grid"></div>
+    <div id="sector-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:12px; width:100%"></div>
+</div>
+
+<div id="view-heatmap" class="main-grid hidden" style="grid-template-columns: 1fr">
+    <div class="card">
+        <div class="ch"><span class="ct">Momentum Heat Map (Z-Score Relative)</span></div>
+        <div class="heat-grid" id="heatmap-container"></div>
+    </div>
 </div>
 
 <div id="view-compare" class="main-grid hidden" style="grid-template-columns: 1fr">
     <div class="card">
-        <div class="ch"><span class="ct">Relative Strength Scorer</span></div>
+        <div class="ch"><span class="ct">Ticker Analysis</span></div>
         <div class="cb">
-            <div class="scorer-input-wrap">
-                <input type="text" id="symbol-in" class="ticker-in" placeholder="ENTER TICKER (e.g. NVDA)">
-                <button class="btn-action" onclick="analyzeTicker()">Analyze Physics</button>
-            </div>
-            <div id="scorer-results"></div>
+            <input type="text" id="symbol-in" placeholder="ENTER TICKER" style="background:#0b0e11; border:1px solid var(--green); color:var(--green); padding:10px; border-radius:8px; width:200px; text-transform:uppercase">
+            <button onclick="analyzeTicker()" style="background:var(--green); color:#000; border:none; padding:10px 20px; border-radius:8px; font-weight:700; margin-left:10px">Run Audit</button>
+            <div id="scorer-results" style="margin-top:20px"></div>
         </div>
     </div>
 </div>
 
 <script>
     const CONFIG = {
-        macro: ['SPY','QQQ','IWM','TLT','GLD','USO','HYG','VIX'],
-        sectors: ['XLK','XLY','XLC','XLF','XLI','XLV','XLP','XLU','XLE','XLB','XLRE'],
-        names: { SPY:'S&P 500', QQQ:'Nasdaq 100', IWM:'Small Cap', VIX:'Volatility Index', XLK:'Technology', XLU:'Utilities' }
+        tickers: ['SPY','QQQ','IWM','DIA','XLK','XLF','XLV','XLE','XLI','XLY','XLP','XLU','XLB','XLRE','XLC','GLD','TLT','USO','BITO'],
+        sectors: ['XLK','XLF','XLV','XLE','XLI','XLY','XLP','XLU','XLB','XLRE','XLC']
     };
 
-    // --- MATH ENGINE ---
     function calcZ(prices) {
-        if (prices.length < 20) return 0;
+        if (prices.length < 10) return 0;
         const vels = [];
-        for (let i = 1; i < prices.length; i++) {
-            vels.push(((prices[i] - prices[i-1]) / prices[i-1]) * 100);
-        }
-        const recent = vels.slice(-20);
-        const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
-        const std = Math.sqrt(recent.reduce((a, b) => a + (b - avg) ** 2, 0) / recent.length) || 1;
-        
-        const curVel = vels[vels.length - 1];
-        const accel = curVel - vels[vels.length - 2];
-        const jerk = accel - (vels[vels.length - 2] - vels[vels.length - 3]);
-        
-        return ((curVel - avg) / std * 0.4 + (accel / std) * 0.4 + (jerk / std) * 0.2).toFixed(2);
+        for (let i = 1; i < prices.length; i++) vels.push(((prices[i]-prices[i-1])/prices[i-1])*100);
+        const avg = vels.reduce((a,b)=>a+b,0)/vels.length;
+        const std = Math.sqrt(vels.reduce((a,b)=>a+(b-avg)**2,0)/vels.length)||1;
+        return ((vels[vels.length-1]-avg)/std).toFixed(2);
     }
 
-    // --- DATA FETCH ---
     async function getPrices(sym) {
         try {
             const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`);
@@ -160,82 +126,45 @@
         } catch (e) { return []; }
     }
 
-    // --- UI CONTROLLERS ---
     function tab(name) {
         document.querySelectorAll('.main-grid').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
         document.getElementById(`view-${name}`).classList.remove('hidden');
         event.target.classList.add('active');
+        if(name === 'heatmap') renderHeatmap();
+    }
+
+    async function renderHeatmap() {
+        const container = document.getElementById('heatmap-container');
+        container.innerHTML = 'Calculating thermals...';
+        let html = '';
+        for (const s of CONFIG.tickers) {
+            const p = await getPrices(s);
+            const z = calcZ(p);
+            const intensity = Math.min(Math.abs(z) * 0.4, 1);
+            const color = z > 0 ? `rgba(0, 255, 170, ${intensity})` : `rgba(255, 51, 85, ${intensity})`;
+            html += `<div class="heat-cell" style="background:${color}; border:1px solid rgba(255,255,255,0.1)">
+                        <div class="heat-sym">${s}</div>
+                        <div class="heat-val">${z}σ</div>
+                     </div>`;
+        }
+        container.innerHTML = html;
     }
 
     async function init() {
-        const macroData = {};
-        for (const s of CONFIG.macro) {
-            const p = await getPrices(s);
-            macroData[s] = calcZ(p);
-        }
-        renderMacro(macroData);
-        renderSectors();
-    }
-
-    function renderMacro(data) {
         const list = document.getElementById('macro-list');
-        list.innerHTML = Object.entries(data).map(([s, z]) => `
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border)">
-                <span style="font-weight:700">${s}</span>
-                <span class="badge ${z > 0 ? 'g' : 'r'}">${z > 0 ? '+' : ''}${z}σ</span>
-            </div>
-        `).join('');
-        
-        const vixZ = data['VIX'];
-        document.getElementById('regime-status').innerText = vixZ > 1 ? 'High Vol / Risk Off' : 'Low Vol / Risk On';
-    }
-
-    async function renderSectors() {
-        const grid = document.getElementById('sector-grid');
-        grid.innerHTML = 'Scanning Sectors...';
         let html = '';
-        for (const s of CONFIG.sectors) {
+        for (const s of ['SPY','QQQ','IWM','VIX']) {
             const p = await getPrices(s);
             const z = calcZ(p);
-            const color = z > 0 ? '#00ffaa' : '#ff3355';
-            const width = Math.min(Math.abs(z) * 20, 100);
-            html += `
-                <div class="sec-tile">
-                    <div class="sec-sym">${s}</div>
-                    <div class="sec-thrust" style="color:${color}">${z}</div>
-                    <div class="sec-vec-track"><div class="sec-vec-fill" style="width:${width}%; background:${color}"></div></div>
-                </div>`;
+            html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border)">
+                        <span>${s}</span><span class="badge ${z>0?'g':'r'}">${z}σ</span>
+                     </div>`;
         }
-        grid.innerHTML = html;
-    }
-
-    async function analyzeTicker() {
-        const sym = document.getElementById('symbol-in').value.toUpperCase();
-        if (!sym) return;
-        const res = document.getElementById('scorer-results');
-        res.innerHTML = 'Calculating Physics...';
-        
-        const p = await getPrices(sym);
-        const spyP = await getPrices('SPY');
-        
-        const z = calcZ(p);
-        const spyZ = calcZ(spyP);
-        const rel = (z - spyZ).toFixed(2);
-
-        res.innerHTML = `
-            <table class="ctable" style="margin-top:20px">
-                <thead><tr><th>METRIC</th><th>VALUE</th><th>STATUS</th></tr></thead>
-                <tbody>
-                    <tr><td>Kinetic Score</td><td class="badge ${z>0?'g':'r'}">${z}σ</td><td>${z>1?'Breakout':z<-1?'Breakdown':'Mean Reversion'}</td></tr>
-                    <tr><td>Rel. Strength (vs SPY)</td><td>${rel}</td><td>${rel>0?'Outperforming':'Lagging'}</td></tr>
-                </tbody>
-            </table>
-        `;
+        list.innerHTML = html;
     }
 
     window.onload = init;
 </script>
-
 </body>
 </html>
