@@ -2,48 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
     <title>KINETIC TERMINAL</title>
     <style>
-        :root { --bg: #0b0e11; --surface: #14171a; --green: #00ffaa; --red: #ff3355; --muted: #707a8a; }
-        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; }
-        .header { display: flex; justify-content: space-between; padding-bottom: 20px; border-bottom: 1px solid #2d333b; margin-bottom: 20px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0b0e11;
+            --surface: #14171a;
+            --border: rgba(255,255,255,0.08);
+            --green: #00ffaa;
+            --red: #ff3355;
+            --muted: #707a8a;
+        }
+        body { background: var(--bg); color: white; font-family: 'Inter', sans-serif; padding: 24px; line-height: 1.5; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+        .logo { font-weight: 900; letter-spacing: 2px; font-size: 18px; }
+        .logo span { color: var(--green); }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid #2d333b; }
-        .row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2d333b; font-family: 'IBM Plex Mono', monospace; }
-        .tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 900; }
+        @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .ct { font-size: 10px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; display: block; }
+        .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .row:last-child { border: none; }
+        .sym { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 15px; }
+        .val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 14px; }
+        .badge { font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 4px; }
         .up { color: var(--green); } .dn { color: var(--red); }
-        .bg-up { background: rgba(0,255,170,0.1); color: var(--green); }
-        .bg-dn { background: rgba(255,51,85,0.1); color: var(--red); }
+        .bg-up { background: rgba(0,255,170,0.1); color: var(--green); border: 1px solid rgba(0,255,170,0.2); }
+        .bg-dn { background: rgba(255,51,85,0.1); color: var(--red); border: 1px solid rgba(255,51,85,0.2); }
     </style>
 </head>
 <body>
     <div class="header">
-        <div style="font-weight:900; letter-spacing:2px;">KINETIC // TERMINAL</div>
-        <div style="color:var(--green); font-size:12px;">● SYSTEM ACTIVE</div>
+        <div class="logo">KINETIC <span>//</span> 2.0</div>
+        <div style="font-size: 10px; font-weight: 800; color: var(--muted);">● LIVE DATA ACTIVE</div>
     </div>
     <div class="grid">
         <div class="card">
-            <div style="font-size:10px; color:var(--muted); margin-bottom:15px;">MACRO VELOCITY</div>
-            <div id="macro"></div>
+            <span class="ct">Macro Velocity // 5D</span>
+            <div id="macro-list"></div>
         </div>
         <div class="card">
-            <div style="font-size:10px; color:var(--muted); margin-bottom:15px;">SECTOR MOMENTUM</div>
-            <div id="sectors"></div>
+            <span class="ct">Sector Momentum // Accel</span>
+            <div id="sector-list"></div>
         </div>
         <div class="card">
-            <div style="font-size:10px; color:var(--muted); margin-bottom:15px;">RISK INDICATORS</div>
-            <div id="risk"></div>
+            <span class="ct">Risk & Volatility // Pressure</span>
+            <div id="risk-list"></div>
         </div>
     </div>
     <script>
         const symbols = {
-            macro: ['SPY', 'QQQ', 'IWM'],
-            sectors: ['XLK', 'XLF', 'XLE'],
-            risk: ['VIX', 'TNX', 'DXY']
+            macro: ['SPY', 'QQQ', 'IWM', 'DIA'],
+            sectors: ['XLK', 'XLF', 'XLE', 'XLV'],
+            risk: ['VIX', 'TNX', 'DXY', 'GLD']
         };
-        async function getData(s) {
+        async function fetchTicker(s) {
             try {
                 const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=5d`);
                 const d = await r.json();
@@ -52,16 +67,25 @@
                 return { s, v, a: v > 0 ? 'ACCEL' : 'DECEL' };
             } catch(e) { return null; }
         }
-        async function draw(id, list) {
+        async function render(id, list) {
+            const container = document.getElementById(id);
             let h = '';
-            for(const s of list) {
-                const d = await getData(s);
-                if(!d) continue;
-                h += `<div class="row"><span>${d.s}</span><span><span class="${d.v>=0?'up':'dn'}">${d.v}%</span> <span class="tag ${d.a=='ACCEL'?'bg-up':'bg-dn'}">${d.a}</span></span></div>`;
+            for (const s of list) {
+                const d = await fetchTicker(s);
+                if (!d) continue;
+                h += `<div class="row">
+                    <span class="sym">${d.s}</span>
+                    <div style="display:flex; align-items:center; gap:12px">
+                        <span class="val ${d.v>=0?'up':'dn'}">${d.v}%</span>
+                        <span class="badge ${d.a=='ACCEL'?'bg-up':'bg-dn'}">${d.a}</span>
+                    </div>
+                </div>`;
             }
-            document.getElementById(id).innerHTML = h;
+            container.innerHTML = h;
         }
-        draw('macro', symbols.macro); draw('sectors', symbols.sectors); draw('risk', symbols.risk);
+        render('macro-list', symbols.macro);
+        render('sector-list', symbols.sectors);
+        render('risk-list', symbols.risk);
     </script>
 </body>
 </html>
