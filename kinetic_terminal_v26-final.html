@@ -4,46 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <title>KINETIC 2.1 — Market Intelligence Terminal</title>
+    <title>KINETIC 2.1 — Terminal</title>
     <style>
     * { box-sizing: border-box; margin: 0; padding: 0 }
     :root {
-        --bg: #0b0e11;
-        --surface: #14171a;
-        --border: rgba(255,255,255,0.06);
-        --border2: rgba(255,255,255,0.1);
-        --green: #00ffaa;
-        --red: #ff3355;
-        --blue: #58a6ff;
-        --amber: #ffcc00;
-        --text: #ffffff;
-        --muted: #707a8a;
-        --dim: #8b94a3;
+        --bg: #0b0e11; --surface: #14171a; --border: rgba(255,255,255,0.06);
+        --border2: rgba(255,255,255,0.1); --green: #00ffaa; --red: #ff3355;
+        --blue: #58a6ff; --amber: #ffcc00; --text: #ffffff; --muted: #707a8a; --dim: #8b94a3;
     }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px }
-    button { font-family: inherit; cursor: pointer }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px; overflow-x: hidden; }
     
-    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 99 }
-    .logo-box { display: flex; align-items: center; gap: 10px }
-    .logo-icon { width: 32px; height: 32px; background: #1a1e23; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 6px }
+    /* RESTORED TOPBAR */
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 100 }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; letter-spacing: 2px }
+    .logo em { color: var(--green); font-style: normal }
     
-    .nav-shell { display: flex; background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 24px; position: sticky; top: 57px; z-index: 98 }
-    .nav-tab { padding: 14px 20px; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; transition: .2s }
+    .pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 11px; font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px }
+    .pill.ok { border-color: rgba(0,255,170,0.3); color: var(--green); background: rgba(0,255,170,0.06) }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
+
+    /* NAV RESTORATION */
+    .nav-shell { display: flex; background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 24px; position: sticky; top: 57px; z-index: 99 }
+    .nav-tab { padding: 14px 20px; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: .2s }
     .nav-tab.active { color: var(--green); border-bottom-color: var(--green) }
 
-    .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; padding: 16px 24px }
+    /* HEATMAP RESTORATION */
+    .heat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; padding: 20px }
+    .heat-cell { height: 90px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.2s }
+    .heat-sym { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 700; margin-bottom: 2px }
+    .heat-z { font-size: 10px; font-weight: 800; opacity: 0.9 }
+
+    /* CORE COMPONENTS */
+    .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; padding: 16px 24px }
     .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden }
     .ch { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center }
-    .ct { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px }
-    .cb { padding: 8px 16px 16px }
-
-    /* HEATMAP STYLES */
-    .heat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 4px; padding: 10px }
-    .heat-cell { height: 80px; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; transition: transform 0.2s }
-    .heat-cell:hover { transform: scale(1.05); z-index: 2; cursor: pointer }
-    .heat-sym { font-size: 14px; margin-bottom: 4px }
-    .heat-val { font-size: 10px; opacity: 0.8 }
-
+    .ct { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px }
+    
     .hidden { display: none }
     .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px }
     .g { color: var(--green); background: rgba(0,255,170,0.1) }
@@ -53,18 +49,18 @@
 <body>
 
 <div class="topbar">
-    <div class="logo-box">
-        <div class="logo-icon">
-            <div style="width:4px;height:10px;background:#3b66f5;border-radius:1px"></div>
-            <div style="width:4px;height:18px;background:#4ba1ff;border-radius:1px"></div>
-            <div style="width:4px;height:24px;background:#00ffaa;border-radius:1px"></div>
+    <div class="logo">
+        <div style="width:28px;height:28px;background:#1a1e23;border-radius:6px;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding-bottom:5px">
+            <div style="width:3px;height:8px;background:#3b66f5;border-radius:1px"></div>
+            <div style="width:3px;height:14px;background:#4ba1ff;border-radius:1px"></div>
+            <div style="width:3px;height:20px;background:#00ffaa;border-radius:1px"></div>
         </div>
-        <div style="display:flex;flex-direction:column;line-height:1">
-            <b style="font-size:16px;letter-spacing:2px">KINETIC</b>
-            <span style="font-size:9px;color:var(--muted);text-transform:uppercase">Intelligence Terminal</span>
-        </div>
+        <span style="margin-left:5px">KINETIC <em>2.1</em></span>
     </div>
-    <div id="regime-status" class="badge g">Analyzing...</div>
+    <div style="display:flex; gap:10px">
+        <div class="pill ok"><span class="dot"></span><span id="regime-txt">Regime: Loading...</span></div>
+        <div class="pill" id="phase-pill"><span class="dot"></span><span id="phase-txt">Scanning Clock...</span></div>
+    </div>
 </div>
 
 <nav class="nav-shell">
@@ -76,28 +72,32 @@
 
 <div id="view-macro" class="main-grid">
     <div class="card">
-        <div class="ch"><span class="ct">Market Velocity</span></div>
-        <div class="cb" id="macro-list">Loading...</div>
+        <div class="ch"><span class="ct">Physics Layer: Velocity & Jerk</span></div>
+        <div id="macro-list" style="padding:10px 16px"></div>
+    </div>
+    <div class="card">
+        <div class="ch"><span class="ct">Market Divergence Spreads</span></div>
+        <div id="div-list" style="padding:10px 16px"></div>
     </div>
 </div>
 
 <div id="view-sectors" class="main-grid hidden">
-    <div id="sector-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:12px; width:100%"></div>
+    <div id="sector-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; width:100%"></div>
 </div>
 
 <div id="view-heatmap" class="main-grid hidden" style="grid-template-columns: 1fr">
     <div class="card">
-        <div class="ch"><span class="ct">Momentum Heat Map (Z-Score Relative)</span></div>
+        <div class="ch"><span class="ct">Global Momentum Thermals</span></div>
         <div class="heat-grid" id="heatmap-container"></div>
     </div>
 </div>
 
 <div id="view-compare" class="main-grid hidden" style="grid-template-columns: 1fr">
     <div class="card">
-        <div class="ch"><span class="ct">Ticker Analysis</span></div>
-        <div class="cb">
-            <input type="text" id="symbol-in" placeholder="ENTER TICKER" style="background:#0b0e11; border:1px solid var(--green); color:var(--green); padding:10px; border-radius:8px; width:200px; text-transform:uppercase">
-            <button onclick="analyzeTicker()" style="background:var(--green); color:#000; border:none; padding:10px 20px; border-radius:8px; font-weight:700; margin-left:10px">Run Audit</button>
+        <div class="ch"><span class="ct">Quant Audit Engine</span></div>
+        <div style="padding:20px">
+            <input type="text" id="symbol-in" placeholder="ENTER TICKER" style="background:#0b0e11; border:1.5px solid var(--green); color:var(--green); padding:12px; border-radius:8px; width:220px; font-family:'IBM Plex Mono'; font-weight:700">
+            <button onclick="analyzeTicker()" style="background:var(--green); color:#0b0e11; border:none; padding:12px 24px; border-radius:8px; font-weight:900; margin-left:10px; cursor:pointer">RUN KINETIC AUDIT</button>
             <div id="scorer-results" style="margin-top:20px"></div>
         </div>
     </div>
@@ -105,63 +105,73 @@
 
 <script>
     const CONFIG = {
-        tickers: ['SPY','QQQ','IWM','DIA','XLK','XLF','XLV','XLE','XLI','XLY','XLP','XLU','XLB','XLRE','XLC','GLD','TLT','USO','BITO'],
-        sectors: ['XLK','XLF','XLV','XLE','XLI','XLY','XLP','XLU','XLB','XLRE','XLC']
+        macro: ['SPY','QQQ','IWM','VIX','GLD','USO','TLT','HYG'],
+        sectors: ['XLK','XLF','XLV','XLE','XLI','XLY','XLP','XLU','XLB','XLRE','XLC'],
+        heat: ['AAPL','MSFT','NVDA','TSLA','META','GOOGL','AMZN','AMD','NFLX','COIN','BITO','U','MSTR','GME']
     };
 
-    function calcZ(prices) {
-        if (prices.length < 10) return 0;
-        const vels = [];
-        for (let i = 1; i < prices.length; i++) vels.push(((prices[i]-prices[i-1])/prices[i-1])*100);
-        const avg = vels.reduce((a,b)=>a+b,0)/vels.length;
-        const std = Math.sqrt(vels.reduce((a,b)=>a+(b-avg)**2,0)/vels.length)||1;
-        return ((vels[vels.length-1]-avg)/std).toFixed(2);
+    function getPhase() {
+        const d = new Date(), t = d.getHours() * 60 + d.getMinutes();
+        if(t < 570) return "Premarket";
+        if(t < 600) return "Opening Vol";
+        if(t < 960) return "Power Hour";
+        return "After Hours";
     }
 
-    async function getPrices(sym) {
+    function calcKinetic(p) {
+        if(p.length < 15) return 0;
+        const v = ((p[p.length-1]-p[p.length-5])/p[p.length-5]*100);
+        const prevV = ((p[p.length-2]-p[p.length-6])/p[p.length-6]*100);
+        const a = v - prevV; // Acceleration
+        const j = a - (prevV - ((p[p.length-3]-p[p.length-7])/p[p.length-7]*100)); // Jerk
+        return (v * 0.4 + a * 0.4 + j * 0.2).toFixed(2);
+    }
+
+    async function getPrices(s) {
         try {
-            const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`);
+            const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=1mo`);
             const d = await r.json();
-            return d.chart.result[0].indicators.quote[0].close.filter(p => p != null);
-        } catch (e) { return []; }
+            return d.chart.result[0].indicators.quote[0].close.filter(x => x != null);
+        } catch(e) { return []; }
     }
 
-    function tab(name) {
-        document.querySelectorAll('.main-grid').forEach(el => el.classList.add('hidden'));
-        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-        document.getElementById(`view-${name}`).classList.remove('hidden');
+    function tab(n) {
+        document.querySelectorAll('.main-grid').forEach(x => x.classList.add('hidden'));
+        document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
+        document.getElementById(`view-${n}`).classList.remove('hidden');
         event.target.classList.add('active');
-        if(name === 'heatmap') renderHeatmap();
+        if(n === 'heatmap') renderHeatmap();
     }
 
     async function renderHeatmap() {
         const container = document.getElementById('heatmap-container');
-        container.innerHTML = 'Calculating thermals...';
+        container.innerHTML = '<div style="color:var(--green)">Simulating Thermals...</div>';
         let html = '';
-        for (const s of CONFIG.tickers) {
+        const all = [...CONFIG.macro, ...CONFIG.sectors, ...CONFIG.heat];
+        for(const s of [...new Set(all)]) {
             const p = await getPrices(s);
-            const z = calcZ(p);
-            const intensity = Math.min(Math.abs(z) * 0.4, 1);
-            const color = z > 0 ? `rgba(0, 255, 170, ${intensity})` : `rgba(255, 51, 85, ${intensity})`;
-            html += `<div class="heat-cell" style="background:${color}; border:1px solid rgba(255,255,255,0.1)">
+            const k = calcKinetic(p);
+            const intensity = Math.min(Math.abs(k) * 0.3, 1);
+            const color = k > 0 ? `rgba(0,255,170,${intensity})` : `rgba(255,51,85,${intensity})`;
+            html += `<div class="heat-cell" style="background:${color}">
                         <div class="heat-sym">${s}</div>
-                        <div class="heat-val">${z}σ</div>
-                     </div>`;
+                        <div class="heat-z">${k}σ</div>
+                    </div>`;
         }
         container.innerHTML = html;
     }
 
     async function init() {
-        const list = document.getElementById('macro-list');
-        let html = '';
-        for (const s of ['SPY','QQQ','IWM','VIX']) {
+        document.getElementById('phase-txt').innerText = getPhase();
+        let mHtml = '';
+        for(const s of CONFIG.macro) {
             const p = await getPrices(s);
-            const z = calcZ(p);
-            html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border)">
-                        <span>${s}</span><span class="badge ${z>0?'g':'r'}">${z}σ</span>
-                     </div>`;
+            const k = calcKinetic(p);
+            mHtml += `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+                <span style="font-weight:700">${s}</span><span class="badge ${k>0?'g':'r'}">${k}σ</span></div>`;
+            if(s === 'VIX') document.getElementById('regime-txt').innerText = k > 0 ? "Regime: Defensive" : "Regime: Tactical Bull";
         }
-        list.innerHTML = html;
+        document.getElementById('macro-list').innerHTML = mHtml;
     }
 
     window.onload = init;
