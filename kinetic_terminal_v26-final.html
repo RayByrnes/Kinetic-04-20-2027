@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <title>KINETIC — Market Intelligence Terminal</title>
+    <title>KINETIC 2.1 — Market Intelligence Terminal</title>
     <style>
     * { box-sizing: border-box; margin: 0; padding: 0 }
     :root {
@@ -19,841 +19,223 @@
         --text: #ffffff;
         --muted: #707a8a;
         --dim: #8b94a3;
-        --grad-accent: linear-gradient(90deg, rgba(0,255,170,0.05) 0%, rgba(0,255,170,1) 100%);
-        --grad-recovery: linear-gradient(90deg, rgba(255,204,0,0.05) 0%, rgba(255,204,0,1) 100%);
-        --grad-danger: linear-gradient(90deg, rgba(255,51,85,0.05) 0%, rgba(255,51,85,1) 100%);
     }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; min-height: 100vh; font-size: 13px }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px }
     button { font-family: inherit; cursor: pointer }
+    
+    /* TOPBAR */
     .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 99 }
-    .logo { font-size: 17px; font-weight: 800; letter-spacing: -0.5px }
-    .logo em { color: var(--green); font-style: normal }
-    .top-pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
-    .pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 11px; font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 5px }
+    .logo-box { display: flex; align-items: center; gap: 10px }
+    .logo-icon { width: 32px; height: 32px; background: #1a1e23; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 6px }
+    .logo-text { display: flex; flex-direction: column; line-height: 1 }
+    .logo-text b { font-size: 16px; font-weight: 900; letter-spacing: 2px; color: #fff }
+    .logo-text span { font-size: 9px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase }
+    
+    .top-pills { display: flex; gap: 8px; align-items: center }
+    .pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 11px; font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 6px }
     .pill.ok { border-color: rgba(0,255,170,0.3); color: var(--green); background: rgba(0,255,170,0.06) }
-    .pill.warn { border-color: rgba(255,204,0,0.3); color: var(--amber); background: rgba(255,204,0,0.06) }
-    .pill.alert { border-color: rgba(255,51,85,0.3); color: var(--red); background: rgba(255,51,85,0.06) }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0 }
-    .btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 5px 13px; font-size: 11px; color: var(--dim); transition: .15s }
-    .btn:hover { background: var(--border2); color: var(--text) }
-    .regime-banner { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; padding: 16px 24px 12px }
-    @media(max-width:1000px){ .regime-banner { grid-template-columns: repeat(3,1fr) } }
-    @media(max-width:640px){ .regime-banner { grid-template-columns: 1fr 1fr } }
-    .rcard { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 16px; position: relative; overflow: hidden }
-    .rcard.accent-green { border-top: 3px solid var(--green) }
-    .rcard.accent-red { border-top: 3px solid var(--red) }
-    .rcard.accent-blue { border-top: 3px solid var(--blue) }
-    .rcard.accent-amber { border-top: 3px solid var(--amber) }
-    .rcard.hero { border-top: 3px solid var(--green); background: linear-gradient(160deg, #14171a 60%, #0a1a13) }
-    .rlabel { font-size: 10px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border) }
-    .rbig { font-size: 22px; font-weight: 900; letter-spacing: -.5px; line-height: 1; margin-bottom: 4px }
-    .rbig.g { color: var(--green) } .rbig.r { color: var(--red) } .rbig.b { color: var(--blue) } .rbig.a { color: var(--amber) }
-    .rsub { font-size: 11px; color: var(--dim); margin-bottom: 10px }
-    .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; letter-spacing: .04em }
-    .badge.g { background: rgba(0,255,170,.12); color: var(--green) }
-    .badge.r { background: rgba(255,51,85,.12); color: var(--red) }
-    .badge.b { background: rgba(88,166,255,.12); color: var(--blue) }
-    .badge.a { background: rgba(255,204,0,.12); color: var(--amber) }
-    .badge.n { background: rgba(255,255,255,.06); color: var(--dim) }
-    .rrow { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 12px; gap: 8px }
-    .rrow:last-child { border-bottom: none }
-    .rrow-label { color: var(--dim) }
-    .rv { font-weight: 700 }
-    .rv.g { color: var(--green) } .rv.r { color: var(--red) } .rv.b { color: var(--blue) } .rv.a { color: var(--amber) }
-    .main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 0 24px 12px }
-    .main2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 24px 12px }
-    @media(max-width:1000px){ .main { grid-template-columns: 1fr 1fr } }
-    @media(max-width:640px){ .main, .main2 { grid-template-columns: 1fr } }
-    .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden }
-    .ch { padding: 12px 16px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border) }
-    .ct { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .1em; text-transform: uppercase }
-    .cb { padding: 4px 16px 12px }
-    .crow { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04); gap: 8px }
-    .crow:last-child { border-bottom: none }
-    .cleft { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0 }
-    .ctick { font-size: 13px; font-weight: 800; color: var(--text); width: 36px; flex-shrink: 0 }
-    .cname { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-    .cright { display: flex; align-items: center; gap: 7px; flex-shrink: 0 }
-    .cval { font-size: 12px; font-weight: 700 }
-    .cval.g { color: var(--green) } .cval.r { color: var(--red) } .cval.a { color: var(--amber) } .cval.m { color: var(--dim) }
-    .gpill { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px }
-    .ga { background: rgba(0,255,170,.12); color: var(--green) }
-    .gb { background: rgba(88,166,255,.12); color: var(--blue) }
-    .gc { background: rgba(255,255,255,.06); color: var(--dim) }
-    .gd { background: rgba(255,204,0,.12); color: var(--amber) }
-    .gf { background: rgba(255,51,85,.12); color: var(--red) }
-    .divrow { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04) }
-    .divrow:last-child { border-bottom: none }
-    .dtag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px }
-    .dtag.h { background: rgba(255,204,0,.12); color: var(--amber) }
-    .dtag.n { background: rgba(255,255,255,.06); color: var(--dim) }
-    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px 16px 12px }
-    .ts { background: rgba(255,255,255,.03); border: 1px solid transparent; border-radius: 8px; padding: 9px 11px }
-    .ts.act { background: rgba(0,255,170,.07); border-color: rgba(0,255,170,.2) }
-    .ts.dng { background: rgba(255,51,85,.07); border-color: rgba(255,51,85,.2) }
-    .ts.cau { background: rgba(255,204,0,.07); border-color: rgba(255,204,0,.2) }
-    .ts-t { font-size: 9px; color: var(--muted); letter-spacing: .04em; margin-bottom: 3px }
-    .ts-n { font-size: 11px; font-weight: 700; color: var(--text) }
-    .ts-n.g { color: var(--green) } .ts-n.r { color: var(--red) } .ts-n.a { color: var(--amber) }
-    .ts-d { font-size: 10px; color: var(--dim); margin-top: 2px }
-    .conv-row { display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-bottom: 1px solid rgba(255,255,255,.04) }
-    .conv-row:last-child { border-bottom: none }
-    .cticker { font-size: 14px; font-weight: 900; width: 40px; flex-shrink: 0; letter-spacing: -.5px }
-    .cticker.g { color: var(--green) } .cticker.r { color: var(--red) } .cticker.a { color: var(--amber) }
-    .cdir { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; flex-shrink: 0 }
-    .dlong { background: rgba(0,255,170,.12); color: var(--green) }
-    .dshort { background: rgba(255,51,85,.12); color: var(--red) }
-    .dwait { background: rgba(255,204,0,.12); color: var(--amber) }
-    .cdetail { font-size: 11px; color: var(--dim); flex: 1; line-height: 1.35 }
-    .clayers { font-size: 11px; font-weight: 700; flex-shrink: 0 }
-    .clayers.s { color: var(--green) } .clayers.w { color: var(--dim) }
-    .globe-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px }
-    .gup { background: rgba(0,255,170,.12); color: var(--green) }
-    .gdn { background: rgba(255,51,85,.12); color: var(--red) }
-    .gne { background: rgba(255,204,0,.12); color: var(--amber) }
-    .alert-bar { background: rgba(255,51,85,.08); border: 1px solid rgba(255,51,85,.3); border-radius: 10px; padding: 10px 18px; margin: 0 24px 10px; font-size: 12px; color: var(--red); font-weight: 700; display: none }
-    .alert-bar.show { display: block }
-    .fullcard { margin: 0 24px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border2); overflow: hidden }
-    .footer { padding: 12px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px }
-    .fl { font-size: 11px; color: var(--dim) }
-    .fr { font-size: 11px; color: var(--dim); text-align: right }
-    .vbadge { display: inline-block; background: rgba(88,166,255,.12); color: var(--blue); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 20px; margin-left: 5px }
-    .loading { text-align: center; padding: 60px 24px; color: var(--dim) }
-    .spin { width: 22px; height: 22px; border: 2px solid var(--border2); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 14px }
-    @keyframes spin { to { transform: rotate(360deg) } }
-    .scorer-wrap { background: #14171a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin: 0 24px 12px; overflow: hidden }
-    .scorer-head { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center }
-    .scorer-body { padding: 14px 18px }
-    .sticker-in { background: #0b0e11; border: 1.5px solid #00ffaa; border-radius: 10px; padding: 9px 12px; font-size: 14px; font-weight: 800; color: #00ffaa; font-family: 'IBM Plex Mono', monospace; letter-spacing: 2px; text-transform: uppercase; width: 100%; outline: none; transition: .15s }
-    .sticker-in:focus { border-color: #00ffaa; box-shadow: 0 0 0 3px rgba(0,255,170,.2); color: #00ffaa }
-    .sticker-in::placeholder { color: rgba(0,255,170,.35); font-weight: 500; letter-spacing: .08em; font-size: 12px; text-transform: none }
-    .sanalyze { background: #00ffaa; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 700; color: #0b0e11; cursor: pointer; font-family: inherit; transition: .15s; white-space: nowrap }
-    .sanalyze:hover { background: #00e09a }
-    .sanalyze:disabled { background: rgba(255,255,255,0.1); color: var(--muted); cursor: not-allowed }
-    .serr { background: rgba(255,51,85,.08); border: 1px solid rgba(255,51,85,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #ff3355; display: none; margin-bottom: 10px }
-    .sspin { text-align: center; padding: 20px; color: var(--muted); font-size: 12px; display: none }
-    .sspin .spin2 { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #00ffaa; border-radius: 50%; animation: sp2 .8s linear infinite; margin: 0 auto 8px }
-    @keyframes sp2 { to { transform: rotate(360deg) } }
-    .sresult { display: none; animation: sfi .25s ease }
-    @keyframes sfi { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
-    .ctable { width: 100%; border-collapse: collapse; font-size: 12px }
-    .ctable th { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border2); background: var(--bg) }
-    .ctable td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle }
-    .ctable tr:last-child td { border-bottom: none }
-    .ctable tr.rank1 { background: rgba(0,255,170,.05) }
-    .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 700; flex-shrink: 0 }
-    .rb1 { background: rgba(0,255,170,.2); color: #00ffaa }
-    .rb2 { background: rgba(88,166,255,.15); color: #60a5fa }
-    .rb3 { background: rgba(255,255,255,.08); color: #8b94a3 }
-    .rb4, .rb5 { background: rgba(255,255,255,.05); color: #8b94a3 }
-    .bar-mini { height: 4px; border-radius: 2px; background: var(--border2); margin-top: 4px; overflow: hidden; min-width: 60px }
-    .bar-mini-fill { height: 100%; border-radius: 2px; transition: width .8s cubic-bezier(0.19,1,0.22,1) }
-    .compare-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px }
-    .cs-card { background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; padding: 12px; text-align: center }
-    .cs-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px }
-    .cs-val { font-size: 16px; font-weight: 800 }
-    .cs-sub { font-size: 10px; color: var(--muted); margin-top: 2px }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
 
-
-
-    /* ── TOOLTIPS ── */
-    .tip { position: relative; cursor: help; border-bottom: 1px dashed var(--muted) }
-    .tip::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
-        background: #1e242b; color: var(--text); font-size: 11px; font-weight: 400; line-height: 1.5;
-        padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border2); white-space: nowrap;
-        max-width: 260px; white-space: normal; width: max-content; max-width: 240px;
-        opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 999; letter-spacing: 0 }
-    .tip:hover::after { opacity: 1 }
-    /* ── NAV SHELL ── */
-    .nav-shell { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 24px; position: sticky; top: 57px; z-index: 98 }
-    .nav-tab { padding: 10px 20px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: .2s; background: none; border-top: none; border-left: none; border-right: none }
-    .nav-tab:hover { color: var(--text) }
+    /* NAV */
+    .nav-shell { display: flex; background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 24px; position: sticky; top: 57px; z-index: 98 }
+    .nav-tab { padding: 14px 20px; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; transition: .2s }
     .nav-tab.active { color: var(--green); border-bottom-color: var(--green) }
-    .nav-panel { display: none }
-    .nav-panel.active { display: block }
-    /* ── SECTOR ROTATION ── */
-    .sec-wrap { padding: 0 24px 12px }
-    .sec-group-label { font-size: 10px; font-weight: 800; letter-spacing: 4px; color: var(--muted); margin: 24px 0 12px; display: flex; align-items: center; gap: 14px; text-transform: uppercase }
-    .sec-group-label::after { content: ""; height: 1px; background: var(--border); flex-grow: 1 }
-    .sec-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) }
-    .sec-tile { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 16px; position: relative; overflow: hidden; cursor: pointer; transition: border-color .2s }
-    .sec-tile:hover { border-color: rgba(255,255,255,0.25) }
-    .sec-tile-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px }
-    .sec-sym { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; color: #fff }
-    .sec-price-box { text-align: right; font-family: 'IBM Plex Mono', monospace }
-    .sec-price { font-size: 13px; font-weight: 600; color: #fff }
-    .sec-pct { font-size: 10px; font-weight: 700; margin-top: 2px }
-    .sec-vec-track { height: 3px; width: 100%; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin: 12px 0 }
-    .sec-vec-fill { height: 100%; width: 0%; transition: width 1.6s cubic-bezier(0.19,1,0.22,1) }
-    .sec-thrust-val { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 700 }
-    .sec-thrust-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 3px; font-weight: 700 }
-    .sec-badge { margin-top: 14px; padding: 9px; background: rgba(255,255,255,.03); font-size: 9px; font-family: 'IBM Plex Mono', monospace; font-weight: 700; letter-spacing: 3px; text-align: center }
-    .sec-tile-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 2px }
 
-    .sec-grid.compact { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) }
-    .sec-grid.compact .sec-tile { padding: 11px }
-    .sec-grid.compact .sec-sym { font-size: 14px }
-    .sec-grid.compact .sec-thrust-val { font-size: 20px }
-    .sec-grid.compact .sec-vec-track { margin: 8px 0 }
-    .sec-grid.compact .sec-badge { margin-top: 10px; padding: 7px; font-size: 8px }
-    .sec-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px }
-    .sec-mode-btns { display: flex; gap: 6px }
-    .sec-btn { background: var(--bg); border: 1px solid var(--border2); color: var(--muted); padding: 5px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: .2s }
-    .sec-btn.active { color: var(--green); border-color: var(--green); background: rgba(0,255,170,.05) }
-    @keyframes flashU2 { 0%{color:var(--green)} 100%{color:#fff} }
-    @keyframes flashD2 { 0%{color:var(--red)} 100%{color:#fff} }
-    .fup { animation: flashU2 1s }
-    .fdn { animation: flashD2 1s }
+    /* LAYOUT */
+    .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; padding: 16px 24px }
+    .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden }
+    .ch { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center }
+    .ct { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px }
+    .cb { padding: 8px 16px 16px }
+
+    /* SECTORS */
+    .sec-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) }
+    .sec-tile { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 16px; position: relative }
+    .sec-sym { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 700 }
+    .sec-thrust { font-size: 24px; font-weight: 900; margin: 8px 0 }
+    .sec-vec-track { height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; margin: 10px 0 }
+    .sec-vec-fill { height: 100%; border-radius: 2px; transition: width 1s ease }
+
+    /* SCORER */
+    .scorer-input-wrap { display: flex; gap: 10px; margin-bottom: 16px }
+    .ticker-in { flex: 1; background: #0b0e11; border: 1.5px solid var(--green); border-radius: 8px; padding: 10px; color: var(--green); font-family: 'IBM Plex Mono'; font-weight: 700; text-transform: uppercase }
+    .btn-action { background: var(--green); color: #000; border: none; padding: 0 20px; border-radius: 8px; font-weight: 700 }
+    
+    .ctable { width: 100%; border-collapse: collapse }
+    .ctable th { text-align: left; font-size: 9px; color: var(--muted); padding: 8px; border-bottom: 1px solid var(--border) }
+    .ctable td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.03) }
+
+    .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px }
+    .g { color: var(--green); background: rgba(0,255,170,0.1) }
+    .r { color: var(--red); background: rgba(255,51,85,0.1) }
+
+    .hidden { display: none }
     </style>
 </head>
 <body>
-    <div class="topbar">
-        <div class="logo" style="display:flex;align-items:center;gap:10px">
-            <div style="width:32px;height:32px;background:#1a1e23;border-radius:6px;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding-bottom:6px;flex-shrink:0">
-                <div style="width:4px;height:8px;background:#3b66f5;border-radius:2px"></div>
-                <div style="width:4px;height:14px;background:#4ba1ff;border-radius:2px"></div>
-                <div style="width:4px;height:20px;background:#00ffaa;border-radius:2px"></div>
-            </div>
-            <div style="display:flex;flex-direction:column;line-height:1">
-                <span style="font-size:16px;font-weight:900;letter-spacing:2px;color:#fff;font-family:'Inter',sans-serif">KINETIC</span>
-                <span style="font-size:9px;letter-spacing:.18em;color:#707a8a;text-transform:uppercase;margin-top:1px">Market Intelligence</span>
-            </div>
+
+<div class="topbar">
+    <div class="logo-box">
+        <div class="logo-icon">
+            <div style="width:4px;height:10px;background:#3b66f5;border-radius:1px"></div>
+            <div style="width:4px;height:18px;background:#4ba1ff;border-radius:1px"></div>
+            <div style="width:4px;height:24px;background:#00ffaa;border-radius:1px"></div>
         </div>
-        <div class="top-pills">
-            <div class="pill ok"><span class="dot"></span><span id="regime-pill">Loading...</span></div>
-            <div class="pill warn"><span class="dot"></span>VIX 3M contango  Q3 caution</div>
-            <div class="pill" id="phase-pill"><span class="dot"></span><span id="phase-txt">Checking...</span></div>
-            <button class="btn" onclick="loadData()">Refresh</button>
+        <div class="logo-text">
+            <b>KINETIC</b>
+            <span>Intelligence Terminal</span>
         </div>
     </div>
-    <div id="alert-bar" class="alert-bar"></div>
-    <nav class="nav-shell">
-        <button class="nav-tab active" onclick="showTab('macro')">Macro</button>
-        <button class="nav-tab" onclick="showTab('sectors')">Sectors</button>
-        <button class="nav-tab" onclick="showTab('compare')">Compare</button>
-        <button class="nav-tab" onclick="showTab('score')">Score</button>
-    </nav>
-    <div id="app">
-        <div class="loading"><div class="spin"></div>Loading live market data from Yahoo Finance...</div>
+    <div class="top-pills">
+        <div class="pill ok"><span class="dot"></span><span id="regime-status">Analyzing Regime...</span></div>
+        <button class="btn-action" style="padding: 5px 12px; font-size: 11px" onclick="init()">Refresh</button>
     </div>
-    <script>
-    const NAMES = {
-        SPY:'S&P 500',GLD:'Gold',TLT:'Long bond',HYG:'High yield',USO:'Crude oil',
-        XTN:'Transports',XLE:'Energy',XLF:'Financials',XLK:'Technology',XLU:'Utilities',
-        IWM:'Small cap',TIP:'TIPS',EEM:'Emerg markets',VNQ:'Real estate',VIX:'Volatility',
-        'CL=F':'Crude /CL','GC=F':'Gold /GC','ES=F':'S&P /ES','NQ=F':'Nasdaq /NQ','ZN=F':'10yr /ZN',
-        EWG:'Germany',EWU:'UK FTSE',FEZ:'Euro stoxx',EWJ:'Japan',EWY:'Korea',EWT:'Taiwan',EWH:'Hong Kong',INDA:'India'
-    };
+</div>
 
-    const SECTOR_MAP = {
-        XLK:  { name: 'Technology',   group: 'tactical'   },
-        XLE:  { name: 'Energy',       group: 'tactical'   },
-        XLC:  { name: 'Comm Svcs',    group: 'tactical'   },
-        XLRE: { name: 'Real Estate',  group: 'tactical'   },
-        XLU:  { name: 'Utilities',    group: 'structural' },
-        XLP:  { name: 'Staples',      group: 'structural' },
-        XLV:  { name: 'Health Care',  group: 'structural' },
-        XLF:  { name: 'Financials',   group: 'structural' },
-        XLI:  { name: 'Industrials',  group: 'structural' },
-        XLB:  { name: 'Materials',    group: 'structural' },
-        XLY:  { name: 'Cons Disc',    group: 'structural' }
-    };
-    const SECTORS = Object.keys(SECTOR_MAP);
-    const FORCE=['SPY','GLD','TLT','HYG','USO','XTN','XLE','XLF','XLK','XLU','IWM','TIP','EEM','VNQ'];
-    const FUTURES=['CL=F','GC=F','ES=F','NQ=F','ZN=F'];
-    const GLOBAL=['EWG','EWU','FEZ','EWJ','EWY','EWT','EWH','INDA'];
-    function getPhase(){
-        const et=new Date().toLocaleString('en-US',{timeZone:'America/New_York'});
-        const d=new Date(et),t=d.getHours()*60+d.getMinutes();
-        if(t<9*60+30)return{n:'Premarket',c:'',a:'Check ES NQ CL'};
-        if(t<9*60+45)return{n:'Avoid',c:'dng',a:'Do NOT trade'};
-        if(t<10*60+15)return{n:'First window',c:'act',a:'Enter breakouts now'};
-        if(t<11*60+30)return{n:'Calm zone',c:'',a:'Manage positions'};
-        if(t<12*60)return{n:'Pre-lunch',c:'cau',a:'Tighten stops'};
-        if(t<13*60)return{n:'Lunch effect',c:'dng',a:'Watch reversal'};
-        if(t<14*60+30)return{n:'Afternoon',c:'',a:'Hold only'};
-        if(t<15*60)return{n:'Power hour',c:'act',a:'Add confirmed units'};
-        if(t<16*60)return{n:'Closing',c:'act',a:'Ride or exit'};
-        return{n:'After hours',c:'',a:'Review model'};
-    }
-    function grade(s){
-        if(s>5)return{g:'A',c:'ga'};if(s>2)return{g:'B',c:'gb'};
-        if(s>0)return{g:'C',c:'gc'};if(s>-2)return{g:'D',c:'gd'};return{g:'F',c:'gf'};
-    }
-    function zsc(arr){
-        if(!arr||arr.length<25)return 0;
-        const vel=[];
-        for(let i=5;i<arr.length;i++)vel.push((arr[i]-arr[i-5])/arr[i-5]*100);
-        const w=vel.slice(-20),mn=w.reduce((a,b)=>a+b,0)/w.length;
-        const sd=Math.sqrt(w.reduce((a,b)=>a+(b-mn)**2,0)/w.length)||0.001;
-        const v=vel[vel.length-1],ac=vel.length>1?v-vel[vel.length-2]:0,jk=vel.length>2?ac-(vel[vel.length-2]-vel[vel.length-3]):0;
-        return parseFloat(((v-mn)/sd*0.30+(ac/sd)*0.36+(jk/sd)*0.34).toFixed(2));
-    }
-    function pct(arr,n=5){
-        if(!arr||arr.length<n+1)return 0;
-        return parseFloat(((arr[arr.length-1]-arr[arr.length-1-n])/arr[arr.length-1-n]*100).toFixed(2));
-    }
-    function pct1(arr){
-        if(!arr||arr.length<2)return 0;
-        return parseFloat(((arr[arr.length-1]-arr[arr.length-2])/arr[arr.length-2]*100).toFixed(2));
-    }
-    window._kCache = {};
-    function parseYahoo(j, sym){
-        const res=j.chart?.result?.[0]; if(!res) return null;
-        const q=res.indicators?.quote?.[0], meta=res.meta;
-        const close=(q?.close||[]).filter(v=>v!=null);
-        if(close.length<20) return null;
-        return {close, high:(q?.high||[]).filter(v=>v!=null),
-            low:(q?.low||[]).filter(v=>v!=null),
-            volume:(q?.volume||[]).filter(v=>v!=null),
-            price:meta?.regularMarketPrice||close[close.length-1]||0,
-            name:meta?.shortName||sym};
-    }
-    async function fetch1(sym){
-        const yUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=3mo`;
-        // 1. Direct Yahoo
-        try{
-            const r=await fetch(yUrl);
-            if(r.ok){ const d=parseYahoo(await r.json(),sym); if(d){window._kCache[sym]=d;return d.close;} }
-        }catch(e){}
-        // 2. allorigins proxy (bypasses CORS for file:// protocol)
-        try{
-            const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`);
-            if(r.ok){ const w=await r.json(); const d=parseYahoo(JSON.parse(w.contents),sym); if(d){window._kCache[sym]=d;return d.close;} }
-        }catch(e){}
-        // 3. corsproxy.io
-        try{
-            const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(yUrl)}`);
-            if(r.ok){ const d=parseYahoo(await r.json(),sym); if(d){window._kCache[sym]=d;return d.close;} }
-        }catch(e){}
-        return[];
-    }
-    let currentSort = 'z';
-    async function loadData(){
-        document.getElementById('app').innerHTML='<div class="loading"><div class="spin"></div>Loading live data...</div>';
-        const syms=[...FORCE,'^VIX',...FUTURES,...GLOBAL,...SECTORS];
-        const all={};
-        await Promise.all(syms.map(async s=>{all[s]=await fetch1(s)}));
-        const scores={};
-        for(const t of FORCE)scores[t]=zsc(all[t]);
-        scores['VIX']=zsc(all['^VIX']);
-        const futV={},globV={};
-        for(const t of FUTURES)futV[t]=pct(all[t],5);
-        for(const t of GLOBAL)globV[t]=pct1(all[t]);
-        const vArr=all['^VIX']||[];
-        const vNow=vArr.length?parseFloat(vArr[vArr.length-1].toFixed(2)):0;
-        const vVel=pct(vArr,5);
-        const regime=vNow<18?'Bull low vol':vNow<25?'Sideways':'Bear high vol';
-        const rCls=vNow<18?'g':vNow<25?'a':'r';
-        const stayP=vNow<18?94.7:vNow<25?68.0:42.0;
-        const advP=vNow<18?5.3:vNow<25?32.0:58.0;
-        const deploy=advP<10?'Full deployment':advP<30?'Half deployment':'Defensive';
-        document.getElementById('regime-pill').textContent=`${regime}  |  Stable ${stayP}%`;
-        const ph=getPhase();
-        document.getElementById('phase-txt').textContent=ph.n;
-        const now=new Date();
-        const ts=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'})+' ET';
-        const sorted=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
-        const longs=sorted.filter(([,s])=>s>1);
-        const shorts=sorted.filter(([,s])=>s<-1).reverse();
-        if(vNow>20&&Math.abs(vVel)>15){
-            const bar=document.getElementById('alert-bar');
-            bar.textContent='REGIME CHANGE ALERT — VIX above 20 with elevated velocity — reduce exposure immediately';
-            bar.classList.add('show');
-        }
-        function srow(t,s){
-            const sc=s>0?'g':s<0?'r':'m';
-            const{g,c}=grade(s);
-            const action=s>2?'Deploy':s>1?'Watch+':s>0?'Watch':s>-2?'Avoid':'Avoid';
-            const ac=s>2?'g':s>0?'a':'r';
-            const tip=`Z-score ${s>0?'+':''}${s}: price momentum is ${Math.abs(s).toFixed(1)} standard deviations ${s>=0?'above':'below'} its recent average. ${s>2?'Strong signal — deploy capital.':s>1?'Positive momentum — watch for entry.':s>0?'Weak positive — monitor only.':s>-2?'Negative momentum — avoid new positions.':'Strong negative — consider hedge.'}`;
-            return`<div class="crow"><div class="cleft"><span class="ctick">${t}</span><span class="cname">${NAMES[t]||t}</span></div><div class="cright"><span class="cval ${sc} tip" data-tip="${tip}" style="cursor:help;border-bottom:1px dashed var(--muted)">${s>0?'+':''}${s}</span><span class="gpill ${c}">${g}</span><span class="gpill ${ac}" style="min-width:52px;text-align:center">${action}</span></div></div>`;
-        }
-        function grow(t,v){
-            const pc=v>0.5?'gup':v<-0.5?'gdn':'gne';
-            const lbl=v>0.5?'Risk on':v<-0.5?'Risk off':'Neutral';
-            return`<div class="crow"><span class="cname">${NAMES[t]||t}</span><span class="globe-pill ${pc}">${v>0?'+':''}${v.toFixed(2)}%  ${lbl}</span></div>`;
-        }
-        const divs=[
-            ['Oil vs transports',(scores.USO||0)-(scores.XTN||0)],
-            ['XTN vs XLE',(scores.XTN||0)-(scores.XLE||0)],
-            ['VIX vs SPY',(scores.VIX||0)-(scores.SPY||0)],
-            ['GLD vs VIX',(scores.GLD||0)-(scores.VIX||0)],
-            ['IWM vs SPY',(scores.IWM||0)-(scores.SPY||0)],
-            ['HYG vs SPY',(scores.HYG||0)-(scores.SPY||0)],
-        ].sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
-        const DIV_TIPS = {
-            'Oil vs transports': 'Oil rising faster than transports signals energy cost pressure. Negative = transports outpacing oil — healthy growth signal.',
-            'XTN vs XLE': 'Transports vs Energy spread. Positive = transports leading — expansion signal. Negative = energy leading — inflationary pressure.',
-            'VIX vs SPY': 'Volatility vs equity spread. Negative = SPY stronger — risk-on, deploy. Positive = VIX rising faster — reduce exposure.',
-            'GLD vs VIX': 'Gold vs volatility spread. Positive = gold outpacing fear — macro uncertainty or dollar weakness signal.',
-            'IWM vs SPY': 'Small cap vs large cap spread. Positive = risk-on rotation — bull confirmation. Negative = flight to large cap safety.',
-            'HYG vs SPY': 'Credit vs equity spread. Positive = aligned risk appetite. Negative = credit weakening before equities — early warning.',
-        };
-        const DIV_ACTION = (l,v) => {
-            if(l==='VIX vs SPY') return v<-1?{a:'Risk-on',c:'g'}:v>1?{a:'Reduce',c:'r'}:{a:'Neutral',c:'gc'};
-            if(l==='HYG vs SPY') return v>0.5?{a:'Confirm',c:'g'}:v<-0.5?{a:'Warning',c:'r'}:{a:'Neutral',c:'gc'};
-            if(l==='IWM vs SPY') return v>0.5?{a:'Bull',c:'g'}:v<-0.5?{a:'Caution',c:'r'}:{a:'Neutral',c:'gc'};
-            return Math.abs(v)>3?{a:'Elevated',c:'gd'}:{a:'Normal',c:'gc'};
-        };
-        function drow([l,v]){
-            const c=v>0?'g':'r';
-            const tip=DIV_TIPS[l]||'Cross-asset momentum divergence. High values signal potential rotation or stress.';
-            const {a,c:ac}=DIV_ACTION(l,v);
-            return`<div class="divrow"><span class="cname tip" data-tip="${tip}" style="cursor:help;border-bottom:1px dashed var(--muted)">${l}</span><div style="display:flex;align-items:center;gap:7px"><span class="cval ${c} tip" data-tip="Divergence score: ${v>0?'+':''}${v.toFixed(2)} standard deviation spread between the two assets." style="cursor:help;border-bottom:1px dashed var(--muted)">${v>0?'+':''}${v.toFixed(2)}</span><span class="gpill ${ac}" style="min-width:52px;text-align:center">${a}</span></div></div>`;
-        }
-        function tslot(time,name,note,cls,nc){
-            return`<div class="ts ${cls}"><div class="ts-t">${time}</div><div class="ts-n ${nc}">${name}</div><div class="ts-d">${note}</div></div>`;
-        }
-        function cconv(ticker,dir,detail,layers,strong){
-            const tc=dir==='Long'?'g':dir==='Short'?'r':'a';
-            const dc=dir==='Long'?'dlong':dir==='Short'?'dshort':'dwait';
-            return`<div class="conv-row"><span class="cticker ${tc}">${ticker}</span><span class="cdir ${dc}">${dir}</span><span class="cdetail">${detail}</span><span class="clayers ${strong?'s':'w'}">${layers}</span></div>`;
-        }
+<nav class="nav-shell">
+    <button class="nav-tab active" onclick="tab('macro')">Macro</button>
+    <button class="nav-tab" onclick="tab('sectors')">Sectors</button>
+    <button class="nav-tab" onclick="tab('compare')">Compare</button>
+</nav>
 
-        // ── Sector scores using same calcZ engine ──
-        window.sectorData = {};
-        for (const t of SECTORS) {
-            const arr = all[t] || [];
-            const z = zsc(arr);
-            const price = arr.length ? arr[arr.length-1] : 0;
-            const chg = arr.length > 1 ? parseFloat(((arr[arr.length-1]-arr[arr.length-2])/arr[arr.length-2]*100).toFixed(2)) : 0;
-            const state = z > 1.0 ? 'EXPANSION' : z > 0 ? 'RECOVERY' : 'CAPITULATION';
-            const tileColor = z > 1.0 ? 'var(--green)' : z > 0 ? 'var(--amber)' : 'var(--red)';
-            const grad = z > 1.0 ? 'var(--grad-accent)' : z > 0 ? 'var(--grad-recovery)' : 'var(--grad-danger)';
-            const barW = Math.min(Math.max(Math.abs(z * 12) + 10, 8), 100);
-            window.sectorData[t] = { z, price, chg, state, tileColor, grad, barW };
-        }
-        const html=`
-  <div class="regime-banner">
-    <div class="rcard hero">
-      <div class="rlabel"><span class="tip" data-tip="Hidden Markov Model — classifies market into Bull, Sideways, or Bear state based on VIX level and velocity.">Market Regime</span></div>
-      <div class="rbig ${rCls}">${regime}</div>
-      <div class="rsub">Stable ${stayP}%  |  Shift risk ${advP}%</div>
-      <span class="badge ${rCls}">${deploy}</span>
-      <div style="margin-top:12px">
-        <div class="rrow"><span class="rrow-label">VIX level</span><span class="rv ${rCls}">${vNow}</span></div>
-        <div class="rrow"><span class="rrow-label">VIX velocity</span><span class="rv ${vVel>0?'r':'g'}">${vVel>0?'+':''}${vVel}%</span></div>
-        <div class="rrow"><span class="rrow-label">Term structure</span><span class="rv b">Contango</span></div>
-      </div>
-    </div>
-    <div class="rcard accent-green">
-      <div class="rlabel"><span class="tip" data-tip="Assets with strongest momentum. Thrust Z-score above +1.0 signals Expansion — prime deployment zone.">High Thrust</span></div>
-      ${longs.slice(0,4).map(([t,s])=>`<div class="rrow"><span class="rv">${t}</span><span class="rrow-label">${NAMES[t]||t}</span><span class="rv g">+${s}</span></div>`).join('')}
-    </div>
-    <div class="rcard accent-red">
-      <div class="rlabel"><span class="tip" data-tip="Assets with weakest momentum. Thrust Z-score below -1.0 signals Capitulation — avoid or hedge.">Low Thrust</span></div>
-      ${shorts.length?shorts.slice(0,4).map(([t,s])=>`<div class="rrow"><span class="rv">${t}</span><span class="rrow-label">${NAMES[t]||t}</span><span class="rv r">${s}</span></div>`).join(''):'<div class="rrow"><span class="rrow-label" style="color:var(--muted);font-style:italic">No shorts — bull regime</span></div>'}
-    </div>
-    <div class="rcard accent-blue">
-      <div class="rlabel"><span class="tip" data-tip="Layer 3: Futures velocity over 5 days. Leading indicator of institutional positioning ahead of equity open.">Futures Forward</span></div>
-      ${Object.entries(futV).map(([t,v])=>`<div class="rrow"><span class="rrow-label">${NAMES[t]||t}</span><span class="rv ${v>0?'g':v<0?'r':'m'}">${v>0?'+':''}${v}%</span></div>`).join('')}
-    </div>
-    <div class="rcard accent-amber">
-      <div class="rlabel"><span class="tip" data-tip="Layer 7: Time-of-day protocol. Avoid first 15 min. Best entries: 06:45-07:15 PT and 11:30-13:00 PT.">Timing  —  Pacific</span></div>
-      <div class="rbig a" style="font-size:17px">${ph.n}</div>
-      <div class="rsub">${ph.a}</div>
-      <div style="margin-top:10px">
-        <div class="rrow"><span class="rrow-label">First window</span><span class="rv g">06:45–07:15</span></div>
-        <div class="rrow"><span class="rrow-label">Lunch reversal</span><span class="rv a">09:00–10:00</span></div>
-        <div class="rrow"><span class="rrow-label">Power hour</span><span class="rv g">11:30–13:00</span></div>
-      </div>
-    </div>
-  </div>
-  <div class="main">
-    <div class="card"><div class="ch"><span class="ct"><span class="tip" data-tip="Force model z-scores graded A–F. A/B = strong momentum, deploy. C = neutral. D/F = weakening, avoid.">Signal Grades</span></span><span class="badge n">Z-score</span></div><div class="cb">${sorted.map(([t,s])=>srow(t,s)).join('')}</div></div>
-    <div class="card"><div class="ch"><span class="ct"><span class="tip" data-tip="Cross-asset divergences: differences in z-scores between related assets. High divergence signals potential rotation or stress.">Divergences</span></span><span class="badge n">Cross-asset</span></div><div class="cb">${divs.map(drow).join('')}</div></div>
-    <div class="card"><div class="ch"><span class="ct">Global Pre-Signal</span><span class="badge n">Overnight velocity</span></div><div class="cb">${Object.entries(globV).sort((a,b)=>b[1]-a[1]).map(([t,v])=>grow(t,v)).join('')}</div></div>
-  </div>
-  <div class="main2">
+<div id="view-macro" class="main-grid">
     <div class="card">
-      <div class="ch"><span class="ct">Timing Protocol  —  Pacific</span><span class="badge n">VIX vel ${vVel>0?'+':''}${vVel}%</span></div>
-      <div class="time-grid">
-        ${tslot('05:00–06:30 PT','Premarket','Check ES NQ CL','','')}
-        ${tslot('06:30–06:45 PT','Avoid','Do NOT trade','dng','r')}
-        ${tslot('06:45–07:15 PT','First window','Enter breakout signals','act','g')}
-        ${tslot('07:15–08:30 PT','Calm zone','Manage positions only','','')}
-        ${tslot('09:00–10:00 PT','Lunch reversal','Strong reversal likely','cau','a')}
-        ${tslot('11:30–13:00 PT','Power hour','Add confirmed units','act','g')}
-      </div>
+        <div class="ch"><span class="ct">Cross-Asset Velocity</span></div>
+        <div class="cb" id="macro-list">Loading...</div>
     </div>
     <div class="card">
-      <div class="ch"><span class="ct">Validation  —  backtest results</span><span class="badge g">Validated</span></div>
-      <div class="cb">
-        <div class="crow"><span class="cname">Annual return  (backtest)</span><span class="cval g">31.9%</span></div>
-        <div class="crow"><span class="cname">Sharpe ratio</span><span class="cval g">3.18  →  1.59 realistic</span></div>
-        <div class="crow"><span class="cname">Max drawdown</span><span class="cval g">-4.1%</span></div>
-        <div class="crow"><span class="cname">Walk-forward 2024</span><span class="cval g">52.9%  +25% alpha</span></div>
-        <div class="crow"><span class="cname">Walk-forward 2025</span><span class="cval g">80.6%  +33% alpha</span></div>
-        <div class="crow"><span class="cname">Monte Carlo 10,000 sims</span><span class="cval g">100% beat SPY</span></div>
-        <div class="crow"><span class="cname">Candlestick filter v3</span><span class="cval r">Rejected  -18% cost</span></div>
-        <div class="crow"><span class="cname">PCA multicollinearity</span><span class="cval g">58.5% PC1  independent</span></div>
-      </div>
+        <div class="ch"><span class="ct">Kinetic Divergence</span></div>
+        <div class="cb" id="div-list">Scanning spreads...</div>
     </div>
-  </div>
-  <div class="fullcard">
-    <div class="ch"><span class="ct"><span class="tip" data-tip="Conviction table synthesizes all 7 model layers. Long = momentum positive across layers. Short = momentum negative. Wait/Caution = conflicting signals.">Conviction Table  —  Auto-generated  |  Live</span></span><span class="badge n">Min 3 of 7 required</span></div>
-    ${longs.slice(0,4).map(([t,s])=>cconv(t,'Long',`Force ${grade(s).g}  |  Z-score +${s}  |  ${NAMES[t]}  |  HMM ${regime}`,`${Math.min(Math.floor(s)+3,7)}/7`,s>3)).join('')}
-    ${shorts.slice(0,3).map(([t,s])=>cconv(t,'Short',`Force ${grade(s).g}  |  Z-score ${s}  |  ${NAMES[t]}  |  Options bearish`,`${Math.min(Math.floor(Math.abs(s))+3,7)}/7`,Math.abs(s)>3)).join('')}
-    ${cconv('GLD','Wait','Options conflicted  |  Put premium vs bullish P/C  |  Two competing forces','conflict',false)}
-    ${cconv('Q3','Caution','VIX 3M contango  |  Fear expected July  |  Build hedges gradually by June','forward',false)}
-  </div>
+</div>
 
-  <div class="footer">
-    <div class="fl">KINETIC  |  San Diego, CA  |  Force model<span class="vbadge">v2.0</span>  |  &copy; 2026</div>
-    <div class="fr">Backtest 31.9% annual  |  Sharpe 3.18  |  Walk-forward 2/2  |  Last updated: ${ts}</div>
-  </div>`;
-        document.getElementById('app').innerHTML=html;
+<div id="view-sectors" class="main-grid hidden">
+    <div class="sec-grid" id="sector-grid"></div>
+</div>
 
-        // Render sector tiles
-        function renderSectors() {
-            ['tactical','structural'].forEach(group => {
-                const el = document.getElementById('sec-' + group);
-                if (!el) return;
-                el.innerHTML = '';
-                const stateOrder = {'EXPANSION':0,'RECOVERY':1,'CAPITULATION':2};
-                const sorted = SECTORS.filter(t => SECTOR_MAP[t].group === group).sort((a,b) => {
-                    const da=window.sectorData[a], db=window.sectorData[b];
-                    if(currentSort==='chg') return db.chg - da.chg;
-                    if(currentSort==='state') return stateOrder[da.state] - stateOrder[db.state];
-                    return db.z - da.z;
-                });
-                sorted.forEach(t => {
-                    const d = window.sectorData[t];
-                    const pctCls = d.chg >= 0 ? 'var(--green)' : 'var(--red)';
-                    const arrow = d.chg >= 0 ? '▲' : '▼';
-                    const tile = document.createElement('div');
-                    tile.className = 'sec-tile';
-                    tile.onclick = () => {
-                        const inp = document.getElementById('c1');
-                        if (inp) inp.value = t;
-                        // Switch to Compare tab
-                        document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
-                        const compareTab = document.querySelector('.nav-tab:nth-child(3)');
-                        if(compareTab) compareTab.classList.add('active');
-                        ['app','panel-sectors'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-                        const cp=document.getElementById('panel-compare');
-                        if(cp){cp.style.display='block';setTimeout(()=>{const i=document.getElementById('c1');if(i)i.focus();},100);}
-                    };
-                    tile.innerHTML = `
-                        <div class="sec-tile-top">
-                            <div>
-                                <span class="sec-sym">${t}</span>
-                                <div style="font-size:10px;color:var(--muted);letter-spacing:.05em;margin-top:2px">${SECTOR_MAP[t].name}</div>
-                            </div>
-                            <div class="sec-price-box">
-                                <div class="sec-price" id="sp-${t}">$${d.price.toFixed(2)}</div>
-                                <div class="sec-pct" style="color:${pctCls}">${arrow} ${Math.abs(d.chg).toFixed(2)}%</div>
-                            </div>
-                        </div>
-                        <div class="sec-vec-track"><div class="sec-vec-fill" id="sv-${t}" style="background:${d.grad}"></div></div>
-                        <div class="sec-thrust-val" style="color:${d.tileColor}">${d.z > 0 ? '+' : ''}${d.z}</div>
-                        <div class="sec-thrust-lbl"><span class="tip" data-tip="Thrust Index = Z-score of price velocity + acceleration + jerk (30/36/34% weights). Above +1.0 = Expansion. Above 0 = Recovery. Below 0 = Capitulation.">Thrust Index</span></div>
-                        <div class="sec-badge" style="border-bottom:3px solid ${d.tileColor};color:${d.tileColor}">${d.state}</div>
-                        <div class="sec-tile-accent" style="background:${d.grad}"></div>
-                    `;
-                    el.appendChild(tile);
-                });
-            });
-            setTimeout(() => {
-                SECTORS.forEach(t => {
-                    const bar = document.getElementById('sv-' + t);
-                    if (bar) bar.style.width = window.sectorData[t].barW + '%';
-                });
-            }, 120);
-        }
-        renderSectors();
-
-        // currentSort is global
-        function setSectorMode(m) {
-            document.querySelectorAll('.sec-grid').forEach(g => g.classList.toggle('compact', m === 'compact'));
-            document.getElementById('sec-std').classList.toggle('active', m === 'standard');
-            document.getElementById('sec-cpt').classList.toggle('active', m === 'compact');
-        }
-        function setSectorSort(s) {
-            currentSort = s;
-            ['z','chg','state'].forEach(id => {
-                const el = document.getElementById('sort-'+id);
-                if(el) el.classList.toggle('active', id === s);
-            });
-            renderSectors();
-        }
-
-        // Sector price pulse
-        const secPulse = setInterval(() => {
-            const t = SECTORS[Math.floor(Math.random() * SECTORS.length)];
-            const d = window.sectorData[t];
-            if (!d) return;
-            const move = (Math.random() - 0.5) * 0.2;
-            d.price += move;
-            const el = document.getElementById('sp-' + t);
-            if (el) {
-                el.innerText = '$' + d.price.toFixed(2);
-                el.classList.remove('fup','fdn');
-                void el.offsetWidth;
-                el.classList.add(move > 0 ? 'fup' : 'fdn');
-            }
-        }, 2800);
-    }
-    loadData();
-    setInterval(loadData,15*60*1000);
-    </script>
-    <!-- SECTOR PANEL - static, outside #app -->
-    <div id="panel-sectors" class="sec-wrap" style="display:none;padding-top:16px">
-      <div class="sec-controls">
-        <span style="font-size:10px;font-weight:800;letter-spacing:3px;color:var(--muted);text-transform:uppercase">Sector Rotation Map</span>
-        <div style="display:flex;gap:6px;align-items:center">
-          <span style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-right:4px">Sort</span>
-          <button class="sec-btn active" id="sort-z" onclick="setSectorSort('z')">Z-Score</button>
-          <button class="sec-btn" id="sort-chg" onclick="setSectorSort('chg')">1-Day</button>
-          <button class="sec-btn" id="sort-state" onclick="setSectorSort('state')">State</button>
-          <div style="width:1px;height:16px;background:var(--border2);margin:0 4px"></div>
-          <button class="sec-btn active" id="sec-std" onclick="setSectorMode('standard')">Standard</button>
-          <button class="sec-btn" id="sec-cpt" onclick="setSectorMode('compact')">Compact</button>
-        </div>
-      </div>
-      <div class="sec-group-label">Tactical Expansion</div>
-      <div class="sec-grid" id="sec-tactical"></div>
-      <div class="sec-group-label">Structural Rotation</div>
-      <div class="sec-grid" id="sec-structural"></div>
-    </div>
-    <div id="panel-compare">
-    <!-- KINETIC COMPARE PANEL -->
-    <div class="scorer-wrap" style="margin-bottom:0;border-radius:12px 12px 0 0;border-bottom:none">
-        <div class="scorer-head">
-            <span class="ct">Kinetic compare  —  up to 5 tickers  |  ranked by z-score</span>
-            <span class="badge n">Physics  |  Turtle  |  Position size</span>
-        </div>
-        <div class="scorer-body">
-            <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px">
-                <input class="sticker-in" id="c1" type="text" placeholder="Ticker 1" maxlength="6" autocomplete="off" spellcheck="false">
-                <input class="sticker-in" id="c2" type="text" placeholder="Ticker 2" maxlength="6" autocomplete="off" spellcheck="false">
-                <input class="sticker-in" id="c3" type="text" placeholder="Ticker 3" maxlength="6" autocomplete="off" spellcheck="false">
-                <input class="sticker-in" id="c4" type="text" placeholder="Ticker 4" maxlength="6" autocomplete="off" spellcheck="false">
-                <input class="sticker-in" id="c5" type="text" placeholder="Ticker 5" maxlength="6" autocomplete="off" spellcheck="false">
+<div id="view-compare" class="main-grid hidden" style="grid-template-columns: 1fr">
+    <div class="card">
+        <div class="ch"><span class="ct">Relative Strength Scorer</span></div>
+        <div class="cb">
+            <div class="scorer-input-wrap">
+                <input type="text" id="symbol-in" class="ticker-in" placeholder="ENTER TICKER (e.g. NVDA)">
+                <button class="btn-action" onclick="analyzeTicker()">Analyze Physics</button>
             </div>
-            <div style="display:flex;gap:8px;margin-bottom:14px">
-                <button class="sanalyze" onclick="runCompare()" style="flex:1">Compare all</button>
-                <button class="sanalyze" onclick="clearCompare()" style="background:var(--bg);color:var(--dim);border:1px solid var(--border2);flex:0 0 auto;padding:10px 16px">Clear</button>
-            </div>
-            <div id="c-err" class="serr"></div>
-            <div id="c-spin" class="sspin"><div class="spin2"></div>Fetching data for all tickers...</div>
-            <div id="c-out"></div>
+            <div id="scorer-results"></div>
         </div>
     </div>
-    <!-- KINETIC SCORE PANEL -->
-    <div class="scorer-wrap" style="border-radius:0 0 12px 12px;border-top:1px solid rgba(255,255,255,0.06)">
-        <div class="scorer-head">
-            <span class="ct">Kinetic score  —  single ticker  |  full force model analysis</span>
-            <span class="badge n">Z-score  |  Turtle check  |  Benchmark</span>
-        </div>
-        <div class="scorer-body">
-            <div style="display:flex;gap:8px;margin-bottom:14px">
-                <input class="sticker-in" id="s-in" type="text" placeholder="e.g. NVDA" maxlength="6" autocomplete="off" spellcheck="false" style="flex:1">
-                <button class="sanalyze" id="s-btn" onclick="scoreIt()">Analyze</button>
-            </div>
-            <div id="s-err" class="serr"></div>
-            <div id="s-spin" class="sspin"><div class="spin2"></div>Fetching live data...</div>
-            <div id="s-out" class="sresult"></div>
-        </div>
-    </div>
-    </div><!-- /panel-compare -->
-    <script>
-    const CINPUTS=['c1','c2','c3','c4','c5'];
-    CINPUTS.forEach(id=>{
-        const el=document.getElementById(id);
-        if(el){
-            el.addEventListener('input',e=>e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9.\-^]/g,''));
-            el.addEventListener('keydown',e=>{if(e.key==='Enter')runCompare()});
+</div>
+
+<script>
+    const CONFIG = {
+        macro: ['SPY','QQQ','IWM','TLT','GLD','USO','HYG','VIX'],
+        sectors: ['XLK','XLY','XLC','XLF','XLI','XLV','XLP','XLU','XLE','XLB','XLRE'],
+        names: { SPY:'S&P 500', QQQ:'Nasdaq 100', IWM:'Small Cap', VIX:'Volatility Index', XLK:'Technology', XLU:'Utilities' }
+    };
+
+    // --- MATH ENGINE ---
+    function calcZ(prices) {
+        if (prices.length < 20) return 0;
+        const vels = [];
+        for (let i = 1; i < prices.length; i++) {
+            vels.push(((prices[i] - prices[i-1]) / prices[i-1]) * 100);
         }
-    });
-    async function fetchOne(sym){
-        if(window._kCache[sym]?.close?.length>20) return window._kCache[sym];
-        const yUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=3mo`;
-        // 1. Direct Yahoo
-        try{
-            const r=await fetch(yUrl);
-            if(r.ok){ const d=parseYahoo(await r.json(),sym); if(d){window._kCache[sym]=d;return d;} }
-        }catch(e){}
-        // 2. allorigins proxy
-        try{
-            const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`);
-            if(r.ok){ const w=await r.json(); const d=parseYahoo(JSON.parse(w.contents),sym); if(d){window._kCache[sym]=d;return d;} }
-        }catch(e){}
-        // 3. corsproxy.io
-        try{
-            const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(yUrl)}`);
-            if(r.ok){ const d=parseYahoo(await r.json(),sym); if(d){window._kCache[sym]=d;return d;} }
-        }catch(e){}
-        return null;
-    }
-    function calcZ(close){
-        if(!close||close.length<25)return 0;
-        const vel=[];
-        for(let i=5;i<close.length;i++)if(close[i-5]>0)vel.push((close[i]-close[i-5])/close[i-5]*100);
-        if(vel.length<20)return 0;
-        const w=vel.slice(-20),mn=w.reduce((a,b)=>a+b,0)/w.length;
-        const sd=Math.sqrt(w.reduce((a,b)=>a+(b-mn)**2,0)/w.length)||0.001;
-        const v=vel[vel.length-1],ac=vel.length>1?v-vel[vel.length-2]:0,jk=vel.length>2?ac-(vel[vel.length-2]-vel[vel.length-3]):0;
-        return parseFloat(((v-mn)/sd*0.30+(ac/sd)*0.36+(jk/sd)*0.34).toFixed(2));
-    }
-    function pctN(a,n){if(!a||a.length<n+1)return 0;return parseFloat(((a[a.length-1]-a[a.length-1-n])/a[a.length-1-n]*100).toFixed(2));}
-    function getA(a){if(!a||a.length<7)return 0;return parseFloat(((a[a.length-1]-a[a.length-6])/a[a.length-6]*100-(a[a.length-2]-a[a.length-7])/a[a.length-7]*100).toFixed(2));}
-    function getJ(a){if(!a||a.length<8)return 0;const a1=(a[a.length-1]-a[a.length-6])/a[a.length-6]*100-(a[a.length-2]-a[a.length-7])/a[a.length-7]*100,a2=(a[a.length-2]-a[a.length-7])/a[a.length-7]*100-(a[a.length-3]-a[a.length-8])/a[a.length-8]*100;return parseFloat((a1-a2).toFixed(2));}
-    function abv50(c){if(!c||c.length<50)return null;return c[c.length-1]>c.slice(-50).reduce((a,b)=>a+b,0)/50;}
-    function abv20h(h){if(!h||h.length<21)return null;return h[h.length-1]>Math.max(...h.slice(-21,-1));}
-    function vsrg(v){if(!v||v.length<21)return false;return v[v.length-1]>v.slice(-21,-1).reduce((a,b)=>a+b,0)/20*1.25;}
-    function gradeOf(s){
-        if(s>5)return{g:'A',c:'#00ffaa'};if(s>2)return{g:'B',c:'#00ffaa'};
-        if(s>0)return{g:'C',c:'#58a6ff'};if(s>-2)return{g:'D',c:'#ffcc00'};
-        if(s>-5)return{g:'F',c:'#ff3355'};return{g:'F-',c:'#ff3355'};
-    }
-    function sizeOf(s){if(s>3)return'Prime 5%';if(s>1)return'Good 3%';if(s>-1)return'Watch 1%';return'Avoid';}
-    function clearCompare(){
-        CINPUTS.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-        document.getElementById('c-out').innerHTML='';
-        document.getElementById('c-err').style.display='none';
-    }
-    async function runCompare(){
-        const syms=CINPUTS.map(id=>document.getElementById(id)?.value.trim().toUpperCase()).filter(s=>s&&s.length>0);
-        if(syms.length<2){const e=document.getElementById('c-err');e.style.display='block';e.textContent='Enter at least 2 tickers to compare.';return;}
-        const out=document.getElementById('c-out'),err=document.getElementById('c-err'),spin=document.getElementById('c-spin');
-        out.innerHTML='';err.style.display='none';spin.style.display='block';
-        const results=[];
-        for(const sym of syms){
-            try{
-                const d=await fetchOne(sym);if(!d)continue;
-                const score=calcZ(d.close),vel5=pctN(d.close,5),accel=getA(d.close),jerk=getJ(d.close);
-                const rs20=pctN(d.close,20),a50=abv50(d.close),a20=abv20h(d.high),surge=vsrg(d.volume);
-                const turtle=(a50===true&&a20===true&&score>1.0);
-                let status=turtle?'Qualified':a50===false?'No 50MA':a20===false?'No 20H':score<=1.0?'Z<1.0':'Check TOS';
-                results.push({sym,score,vel5,accel,jerk,rs20,a50,a20,surge,turtle,status,price:d.price,name:d.name,size:sizeOf(score)});
-            }catch(e){}
-        }
-        spin.style.display='none';
-        if(results.length===0){err.style.display='block';err.textContent='Could not load any tickers. Check symbols and try again.';return;}
-        results.sort((a,b)=>b.score-a.score);
-        const longs=results.filter(r=>r.score>1.0),shorts=results.filter(r=>r.score<-1.0);
-        const best=results[0],maxScore=Math.max(...results.map(r=>Math.abs(r.score)),1);
-        const rankCls=['rb1','rb2','rb3','rb4','rb5'];
-        const summary=`<div class="compare-summary">
-            <div class="cs-card"><div class="cs-label">Best opportunity</div><div class="cs-val" style="color:#00ffaa">${best.sym}</div><div class="cs-sub">Z-score ${best.score>0?'+':''}${best.score}  |  ${best.size}</div></div>
-            <div class="cs-card"><div class="cs-label">Long candidates</div><div class="cs-val" style="color:#00ffaa">${longs.length}</div><div class="cs-sub">${longs.map(r=>r.sym).join('  ')||'None above threshold'}</div></div>
-            <div class="cs-card"><div class="cs-label">Short candidates</div><div class="cs-val" style="color:#ff3355">${shorts.length}</div><div class="cs-sub">${shorts.map(r=>r.sym).join('  ')||'None below threshold'}</div></div>
-        </div>`;
-        const rows=results.map((r,i)=>{
-            const{g,c}=gradeOf(r.score);
-            const barW=Math.min(100,Math.abs(r.score)/maxScore*100);
-            const barGrad=r.score>0?'linear-gradient(90deg,rgba(0,255,170,0.05),#00ffaa)':'linear-gradient(90deg,rgba(255,51,85,0.05),#ff3355)';
-            const barCol=r.score>0?'#00ffaa':'#ff3355';
-            const v5c=r.vel5>0?'#00ffaa':'#ff3355';
-            const v5=r.vel5>=0?'+'+r.vel5+'%':r.vel5+'%';
-            const ac=r.accel>=0?'+'+r.accel:r.accel;
-            const jk=r.jerk>=0?'+'+r.jerk:r.jerk;
-            const a50s=r.a50===true?'<span style="color:#00ffaa">Yes</span>':r.a50===false?'<span style="color:#ff3355">No</span>':'<span style="color:#8b94a3">N/A</span>';
-            const a20s=r.a20===true?'<span style="color:#00ffaa">Yes</span>':r.a20===false?'<span style="color:#ff3355">No</span>':'<span style="color:#8b94a3">N/A</span>';
-            const turt=r.turtle?'<span style="color:#00ffaa;font-weight:700">Qualified</span>':'<span style="color:#8b94a3">'+r.status+'</span>';
-            return`<tr class="${i===0?'rank1':''}">
-                <td><span class="rank-badge ${rankCls[i]||'rb5'}">${i+1}</span></td>
-                <td><div style="font-weight:800;font-size:13px;color:#fff">${r.sym}</div><div style="font-size:10px;color:#8b94a3;margin-top:1px">${r.name.slice(0,22)}</div></td>
-                <td style="font-size:13px;font-weight:700;color:${c}">${g}</td>
-                <td style="background:${r.score>3?'rgba(0,255,170,.12)':r.score>1?'rgba(0,255,170,.06)':r.score<-2?'rgba(255,51,85,.12)':r.score<0?'rgba(255,51,85,.05)':'transparent'};border-radius:6px">
-                    <div style="font-weight:800;color:${barCol};font-size:14px">${r.score>0?'+':''}${r.score}</div>
-                    <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%;background:${barGrad}"></div></div>
-                </td>
-                <td style="color:${v5c};font-weight:600">${v5}</td>
-                <td style="color:${r.accel>=0?'#00ffaa':'#ff3355'};font-weight:600">${ac}</td>
-                <td style="color:${r.jerk>=0?'#00ffaa':'#ff3355'};font-weight:600">${jk}</td>
-                <td style="color:${r.rs20>=0?'#00ffaa':'#ff3355'};font-weight:600">${r.rs20>=0?'+':''}${r.rs20}%</td>
-                <td>${a50s}</td><td>${a20s}</td><td>${turt}</td>
-                <td><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:${r.score>3?'rgba(0,255,170,.12)':r.score>1?'rgba(88,166,255,.12)':'rgba(255,255,255,.06)'};color:${r.score>3?'#00ffaa':r.score>1?'#58a6ff':'#8b94a3'}">${r.size}</span></td>
-                <td>${r.surge?'<span style="color:#ffcc00;font-size:10px;font-weight:700">Surge</span>':'<span style="color:#8b94a3;font-size:10px">Normal</span>'}</td>
-            </tr>`;
-        }).join('');
-        out.innerHTML=summary+`<div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border2)">
-            <table class="ctable">
-                <thead><tr><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Rank by z-score. #1 = strongest momentum signal in this comparison.">#</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Stock symbol and company name.">Ticker</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Force model grade A-F. A/B = strong momentum, deploy. C = watch. D/F = avoid.">Grade</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Thrust index: velocity + acceleration + jerk of price momentum. Above +1.0 = Expansion. Above 0 = Recovery. Below 0 = Capitulation.">Z-score</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="5-day price velocity — % move over last 5 trading days. Positive = upward momentum.">Vel 5d</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Acceleration — is momentum speeding up or slowing down? Positive = gaining thrust. Negative = losing thrust.">Accel</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Rate of change of acceleration. Positive = acceleration itself is increasing. Key early warning signal.">Jerk</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="20-day relative strength — % move over last 20 trading days vs recent baseline.">RS 20d</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Is price above the 50-day moving average? Yes = uptrend confirmed. No = below trend, caution.">50MA</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Is price above the 20-day high? Yes = breakout confirmed — Turtle entry signal.">20H</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Turtle system: requires above 50MA + above 20-day high + Z-score above +1.0. All three must pass.">Turtle</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Recommended position size. Prime 5% = full position. Good 3% = reduced. Watch 1% = scout only.">Size</th><th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:2px;color:#707a8a;cursor:help;border-bottom:1px dashed rgba(255,255,255,0.15)" title="Volume vs 20-day average. Surge = 25%+ above average — institutional participation likely.">Volume</th></tr></thead>
-                <tbody>${rows}</tbody>
-            </table></div>`;
-    }
-    async function scoreIt(){
-        const sym=document.getElementById('s-in')?.value.trim().toUpperCase();
-        if(!sym){const e=document.getElementById('s-err');e.style.display='block';e.textContent='Enter a ticker symbol.';return;}
-        const err=document.getElementById('s-err'),spin=document.getElementById('s-spin'),out=document.getElementById('s-out');
-        err.style.display='none';out.style.display='none';spin.style.display='block';
-        document.getElementById('s-btn').disabled=true;
-        const d=await fetchOne(sym);
-        spin.style.display='none';document.getElementById('s-btn').disabled=false;
-        if(!d){err.style.display='block';err.textContent='Could not load data for '+sym+'. Check the symbol and try again.';return;}
-        const score=calcZ(d.close),vel5=pctN(d.close,5),vel20=pctN(d.close,20),accel=getA(d.close),jerk=getJ(d.close);
-        const a50=abv50(d.close),a20h=abv20h(d.high),surge=vsrg(d.volume);
-        const turtle=(a50===true&&a20h===true&&score>1.0);
-        const{g,c}=gradeOf(score);
-        const state=score>1.0?'EXPANSION':score>0?'RECOVERY':'CAPITULATION';
-        const stateCol=score>1.0?'var(--green)':score>0?'var(--amber)':'var(--red)';
-        const stateGrad=score>1.0?'var(--grad-accent)':score>0?'var(--grad-recovery)':'var(--grad-danger)';
-        const barW=Math.min(Math.max(Math.abs(score*12)+10,8),100);
-        const size=sizeOf(score);
-        const layers=[
-            {l:'Z-score velocity',v:score>0?'+'+score:score,pass:score>1.0},
-            {l:'5-day velocity',v:(vel5>0?'+':'')+vel5+'%',pass:vel5>0},
-            {l:'20-day RS',v:(vel20>0?'+':'')+vel20+'%',pass:vel20>0},
-            {l:'Acceleration',v:(accel>=0?'+':'')+accel,pass:accel>=0},
-            {l:'Jerk',v:(jerk>=0?'+':'')+jerk,pass:jerk>=0},
-            {l:'Above 50MA',v:a50===true?'Yes':a50===false?'No':'N/A',pass:a50===true},
-            {l:'Above 20-day High',v:a20h===true?'Yes':a20h===false?'No':'N/A',pass:a20h===true},
-        ];
-        const passCount=layers.filter(l=>l.pass).length;
-        out.style.display='block';
-        out.innerHTML=`
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-            <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px;border-top:3px solid ${stateCol}">
-                <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">${sym} — ${d.name.slice(0,28)}</div>
-                <div style="font-family:'IBM Plex Mono',monospace;font-size:32px;font-weight:700;color:${stateCol}">${score>0?'+':''}${score}</div>
-                <div style="font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:10px">THRUST INDEX</div>
-                <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-bottom:12px">
-                    <div style="height:100%;width:${barW}%;background:${stateGrad};transition:width 1.4s cubic-bezier(0.19,1,0.22,1)"></div>
-                </div>
-                <div style="display:flex;gap:8px;align-items:center">
-                    <span style="font-size:18px;font-weight:700;color:${c}">${g}</span>
-                    <span style="font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.06);color:var(--dim)">${size}</span>
-                    <span style="font-size:10px;padding:3px 10px;border-radius:4px;border-bottom:2px solid ${stateCol};background:rgba(255,255,255,0.03);color:${stateCol};font-family:'IBM Plex Mono',monospace;font-weight:700;letter-spacing:2px">${state}</span>
-                </div>
-            </div>
-            <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px">
-                <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Force Model — ${passCount}/7 layers</div>
-                ${layers.map(l=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px">
-                    <span style="color:var(--dim)">${l.l}</span>
-                    <span style="font-weight:700;color:${l.pass?'var(--green)':'var(--red)'}">${l.v}</span>
-                </div>`).join('')}
-                <div style="margin-top:10px;padding:8px;text-align:center;border-radius:6px;background:${turtle?'rgba(0,255,170,0.08)':'rgba(255,255,255,0.03)'};border:1px solid ${turtle?'rgba(0,255,170,0.3)':'var(--border2)'}">
-                    <span style="font-size:10px;font-weight:700;color:${turtle?'var(--green)':'var(--dim)'}">TURTLE ${turtle?'✓ QUALIFIED':'✗ '+layers.find(l=>!l.pass)?.l?.toUpperCase()||'NOT QUALIFIED'}</span>
-                </div>
-            </div>
-        </div>
-        <div style="background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px">
-            <div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Price — $${d.price.toFixed(2)} &nbsp;|&nbsp; Volume ${surge?'<span style="color:var(--amber);font-weight:700">SURGE</span>':'<span style="color:var(--dim)">Normal</span>'}</div>
-            <div style="font-size:11px;color:var(--dim)">Entry size: <strong style="color:var(--text)">${size}</strong> &nbsp;|&nbsp; Signal layers passed: <strong style="color:${passCount>=5?'var(--green)':passCount>=3?'var(--amber)':'var(--red)'}">${passCount}/7</strong> &nbsp;|&nbsp; Regime: <strong style="color:${stateCol}">${state}</strong></div>
-        </div>`;
+        const recent = vels.slice(-20);
+        const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+        const std = Math.sqrt(recent.reduce((a, b) => a + (b - avg) ** 2, 0) / recent.length) || 1;
+        
+        const curVel = vels[vels.length - 1];
+        const accel = curVel - vels[vels.length - 2];
+        const jerk = accel - (vels[vels.length - 2] - vels[vels.length - 3]);
+        
+        return ((curVel - avg) / std * 0.4 + (accel / std) * 0.4 + (jerk / std) * 0.2).toFixed(2);
     }
 
-    function showTab(tab) {
-        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+    // --- DATA FETCH ---
+    async function getPrices(sym) {
+        try {
+            const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`);
+            const d = await r.json();
+            return d.chart.result[0].indicators.quote[0].close.filter(p => p != null);
+        } catch (e) { return []; }
+    }
+
+    // --- UI CONTROLLERS ---
+    function tab(name) {
+        document.querySelectorAll('.main-grid').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+        document.getElementById(`view-${name}`).classList.remove('hidden');
         event.target.classList.add('active');
-        const panels = {
-            macro:   document.getElementById('app'),
-            sectors: document.getElementById('panel-sectors'),
-            compare: document.getElementById('panel-compare'),
-        };
-        Object.values(panels).forEach(p => { if(p) p.style.display = 'none'; });
-        if(tab === 'macro'  && panels.macro)   panels.macro.style.display = 'block';
-        if(tab === 'sectors'&& panels.sectors) panels.sectors.style.display = 'block';
-        if(tab === 'compare'&& panels.compare){ panels.compare.style.display = 'block'; setTimeout(()=>document.getElementById('c1')?.focus(),100); }
-        if(tab === 'score'  && panels.compare){
-            panels.compare.style.display = 'block';
-            setTimeout(()=>{ const sp=document.getElementById('s-in'); if(sp){sp.scrollIntoView({behavior:'smooth'});sp.focus();} },100);
-        }
     }
-    </script>
+
+    async function init() {
+        const macroData = {};
+        for (const s of CONFIG.macro) {
+            const p = await getPrices(s);
+            macroData[s] = calcZ(p);
+        }
+        renderMacro(macroData);
+        renderSectors();
+    }
+
+    function renderMacro(data) {
+        const list = document.getElementById('macro-list');
+        list.innerHTML = Object.entries(data).map(([s, z]) => `
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border)">
+                <span style="font-weight:700">${s}</span>
+                <span class="badge ${z > 0 ? 'g' : 'r'}">${z > 0 ? '+' : ''}${z}σ</span>
+            </div>
+        `).join('');
+        
+        const vixZ = data['VIX'];
+        document.getElementById('regime-status').innerText = vixZ > 1 ? 'High Vol / Risk Off' : 'Low Vol / Risk On';
+    }
+
+    async function renderSectors() {
+        const grid = document.getElementById('sector-grid');
+        grid.innerHTML = 'Scanning Sectors...';
+        let html = '';
+        for (const s of CONFIG.sectors) {
+            const p = await getPrices(s);
+            const z = calcZ(p);
+            const color = z > 0 ? '#00ffaa' : '#ff3355';
+            const width = Math.min(Math.abs(z) * 20, 100);
+            html += `
+                <div class="sec-tile">
+                    <div class="sec-sym">${s}</div>
+                    <div class="sec-thrust" style="color:${color}">${z}</div>
+                    <div class="sec-vec-track"><div class="sec-vec-fill" style="width:${width}%; background:${color}"></div></div>
+                </div>`;
+        }
+        grid.innerHTML = html;
+    }
+
+    async function analyzeTicker() {
+        const sym = document.getElementById('symbol-in').value.toUpperCase();
+        if (!sym) return;
+        const res = document.getElementById('scorer-results');
+        res.innerHTML = 'Calculating Physics...';
+        
+        const p = await getPrices(sym);
+        const spyP = await getPrices('SPY');
+        
+        const z = calcZ(p);
+        const spyZ = calcZ(spyP);
+        const rel = (z - spyZ).toFixed(2);
+
+        res.innerHTML = `
+            <table class="ctable" style="margin-top:20px">
+                <thead><tr><th>METRIC</th><th>VALUE</th><th>STATUS</th></tr></thead>
+                <tbody>
+                    <tr><td>Kinetic Score</td><td class="badge ${z>0?'g':'r'}">${z}σ</td><td>${z>1?'Breakout':z<-1?'Breakdown':'Mean Reversion'}</td></tr>
+                    <tr><td>Rel. Strength (vs SPY)</td><td>${rel}</td><td>${rel>0?'Outperforming':'Lagging'}</td></tr>
+                </tbody>
+            </table>
+        `;
+    }
+
+    window.onload = init;
+</script>
+
 </body>
 </html>
