@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <title>KINETIC 2.0 — Market Intelligence Terminal</title>
+    <title>KINETIC — Market Intelligence Terminal</title>
     <style>
     * { box-sizing: border-box; margin: 0; padding: 0 }
     :root {
@@ -15,148 +15,407 @@
         --green: #00ffaa;
         --red: #ff3355;
         --blue: #58a6ff;
+        --amber: #ffcc00;
         --text: #ffffff;
         --muted: #707a8a;
         --dim: #8b94a3;
+        --grad-accent: linear-gradient(90deg, rgba(0,255,170,0.05) 0%, rgba(0,255,170,1) 100%);
+        --grad-recovery: linear-gradient(90deg, rgba(255,204,0,0.05) 0%, rgba(255,204,0,1) 100%);
+        --grad-danger: linear-gradient(90deg, rgba(255,51,85,0.05) 0%, rgba(255,51,85,1) 100%);
     }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px; overflow-x: hidden }
-    
-    /* TOPBAR LOGIC */
-    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 100 }
-    .logo-box { display: flex; align-items: center; gap: 10px }
-    .logo-icon { width: 32px; height: 32px; background: #1a1e23; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 6px }
-    
-    .status-group { display: flex; gap: 12px }
-    .pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; color: var(--dim); display: flex; align-items: center; gap: 6px }
-    .pill.active { border-color: rgba(0,255,170,0.3); color: var(--green); background: rgba(0,255,170,0.06) }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
-
-    /* MAIN LAYOUT */
-    .terminal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; padding: 16px 24px }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; min-height: 100vh; font-size: 13px }
+    button { font-family: inherit; cursor: pointer }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 99 }
+    .logo { font-size: 17px; font-weight: 800; letter-spacing: -0.5px }
+    .logo em { color: var(--green); font-style: normal }
+    .top-pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+    .pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 11px; font-size: 11px; color: var(--dim); display: flex; align-items: center; gap: 5px }
+    .pill.ok { border-color: rgba(0,255,170,0.3); color: var(--green); background: rgba(0,255,170,0.06) }
+    .pill.warn { border-color: rgba(255,204,0,0.3); color: var(--amber); background: rgba(255,204,0,0.06) }
+    .pill.alert { border-color: rgba(255,51,85,0.3); color: var(--red); background: rgba(255,51,85,0.06) }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0 }
+    .btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 5px 13px; font-size: 11px; color: var(--dim); transition: .15s }
+    .btn:hover { background: var(--border2); color: var(--text) }
+    .regime-banner { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; padding: 16px 24px 12px }
+    @media(max-width:1000px){ .regime-banner { grid-template-columns: repeat(3,1fr) } }
+    @media(max-width:640px){ .regime-banner { grid-template-columns: 1fr 1fr } }
+    .rcard { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 16px; position: relative; overflow: hidden }
+    .rcard.accent-green { border-top: 3px solid var(--green) }
+    .rcard.accent-red { border-top: 3px solid var(--red) }
+    .rcard.accent-blue { border-top: 3px solid var(--blue) }
+    .rcard.accent-amber { border-top: 3px solid var(--amber) }
+    .rcard.hero { border-top: 3px solid var(--green); background: linear-gradient(160deg, #14171a 60%, #0a1a13) }
+    .rlabel { font-size: 10px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; font-weight: 700; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border) }
+    .rbig { font-size: 22px; font-weight: 900; letter-spacing: -.5px; line-height: 1; margin-bottom: 4px }
+    .rbig.g { color: var(--green) } .rbig.r { color: var(--red) } .rbig.b { color: var(--blue) } .rbig.a { color: var(--amber) }
+    .rsub { font-size: 11px; color: var(--dim); margin-bottom: 10px }
+    .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; letter-spacing: .04em }
+    .badge.g { background: rgba(0,255,170,.12); color: var(--green) }
+    .badge.r { background: rgba(255,51,85,.12); color: var(--red) }
+    .badge.b { background: rgba(88,166,255,.12); color: var(--blue) }
+    .badge.a { background: rgba(255,204,0,.12); color: var(--amber) }
+    .badge.n { background: rgba(255,255,255,.06); color: var(--dim) }
+    .rrow { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.04); font-size: 12px; gap: 8px }
+    .rrow:last-child { border-bottom: none }
+    .rrow-label { color: var(--dim) }
+    .rv { font-weight: 700 }
+    .rv.g { color: var(--green) } .rv.r { color: var(--red) } .rv.b { color: var(--blue) } .rv.a { color: var(--amber) }
+    .main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 0 24px 12px }
+    .main2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 24px 12px }
+    @media(max-width:1000px){ .main { grid-template-columns: 1fr 1fr } }
+    @media(max-width:640px){ .main, .main2 { grid-template-columns: 1fr } }
     .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden }
-    .ch { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center }
-    .ct { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px }
-    .cb { padding: 8px 16px 16px }
+    .ch { padding: 12px 16px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border) }
+    .ct { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .1em; text-transform: uppercase }
+    .cb { padding: 4px 16px 12px }
+    .crow { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04); gap: 8px }
+    .crow:last-child { border-bottom: none }
+    .cleft { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0 }
+    .ctick { font-size: 13px; font-weight: 800; color: var(--text); width: 36px; flex-shrink: 0 }
+    .cname { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+    .cright { display: flex; align-items: center; gap: 7px; flex-shrink: 0 }
+    .cval { font-size: 12px; font-weight: 700 }
+    .cval.g { color: var(--green) } .cval.r { color: var(--red) } .cval.a { color: var(--amber) } .cval.m { color: var(--dim) }
+    .gpill { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px }
+    .ga { background: rgba(0,255,170,.12); color: var(--green) }
+    .gb { background: rgba(88,166,255,.12); color: var(--blue) }
+    .gc { background: rgba(255,255,255,.06); color: var(--dim) }
+    .gd { background: rgba(255,204,0,.12); color: var(--amber) }
+    .gf { background: rgba(255,51,85,.12); color: var(--red) }
+    .divrow { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.04) }
+    .divrow:last-child { border-bottom: none }
+    .dtag { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px }
+    .dtag.h { background: rgba(255,204,0,.12); color: var(--amber) }
+    .dtag.n { background: rgba(255,255,255,.06); color: var(--dim) }
+    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px 16px 12px }
+    .ts { background: rgba(255,255,255,.03); border: 1px solid transparent; border-radius: 8px; padding: 9px 11px }
+    .ts.act { background: rgba(0,255,170,.07); border-color: rgba(0,255,170,.2) }
+    .ts.dng { background: rgba(255,51,85,.07); border-color: rgba(255,51,85,.2) }
+    .ts.cau { background: rgba(255,204,0,.07); border-color: rgba(255,204,0,.2) }
+    .ts-t { font-size: 9px; color: var(--muted); letter-spacing: .04em; margin-bottom: 3px }
+    .ts-n { font-size: 11px; font-weight: 700; color: var(--text) }
+    .ts-n.g { color: var(--green) } .ts-n.r { color: var(--red) } .ts-n.a { color: var(--amber) }
+    .ts-d { font-size: 10px; color: var(--dim); margin-top: 2px }
+    .conv-row { display: flex; align-items: center; gap: 10px; padding: 9px 16px; border-bottom: 1px solid rgba(255,255,255,.04) }
+    .conv-row:last-child { border-bottom: none }
+    .cticker { font-size: 14px; font-weight: 900; width: 40px; flex-shrink: 0; letter-spacing: -.5px }
+    .cticker.g { color: var(--green) } .cticker.r { color: var(--red) } .cticker.a { color: var(--amber) }
+    .cdir { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; flex-shrink: 0 }
+    .dlong { background: rgba(0,255,170,.12); color: var(--green) }
+    .dshort { background: rgba(255,51,85,.12); color: var(--red) }
+    .dwait { background: rgba(255,204,0,.12); color: var(--amber) }
+    .cdetail { font-size: 11px; color: var(--dim); flex: 1; line-height: 1.35 }
+    .clayers { font-size: 11px; font-weight: 700; flex-shrink: 0 }
+    .clayers.s { color: var(--green) } .clayers.w { color: var(--dim) }
+    .globe-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px }
+    .gup { background: rgba(0,255,170,.12); color: var(--green) }
+    .gdn { background: rgba(255,51,85,.12); color: var(--red) }
+    .gne { background: rgba(255,204,0,.12); color: var(--amber) }
+    .alert-bar { background: rgba(255,51,85,.08); border: 1px solid rgba(255,51,85,.3); border-radius: 10px; padding: 10px 18px; margin: 0 24px 10px; font-size: 12px; color: var(--red); font-weight: 700; display: none }
+    .alert-bar.show { display: block }
+    .fullcard { margin: 0 24px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border2); overflow: hidden }
+    .footer { padding: 12px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px }
+    .fl { font-size: 11px; color: var(--dim) }
+    .fr { font-size: 11px; color: var(--dim); text-align: right }
+    .vbadge { display: inline-block; background: rgba(88,166,255,.12); color: var(--blue); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 20px; margin-left: 5px }
+    .loading { text-align: center; padding: 60px 24px; color: var(--dim) }
+    .spin { width: 22px; height: 22px; border: 2px solid var(--border2); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 14px }
+    @keyframes spin { to { transform: rotate(360deg) } }
+    .scorer-wrap { background: #14171a; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin: 0 24px 12px; overflow: hidden }
+    .scorer-head { padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center }
+    .scorer-body { padding: 14px 18px }
+    .sticker-in { background: #0b0e11; border: 1.5px solid #00ffaa; border-radius: 10px; padding: 9px 12px; font-size: 14px; font-weight: 800; color: #00ffaa; font-family: 'IBM Plex Mono', monospace; letter-spacing: 2px; text-transform: uppercase; width: 100%; outline: none; transition: .15s }
+    .sticker-in:focus { border-color: #00ffaa; box-shadow: 0 0 0 3px rgba(0,255,170,.2); color: #00ffaa }
+    .sticker-in::placeholder { color: rgba(0,255,170,.35); font-weight: 500; letter-spacing: .08em; font-size: 12px; text-transform: none }
+    .sanalyze { background: #00ffaa; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 700; color: #0b0e11; cursor: pointer; font-family: inherit; transition: .15s; white-space: nowrap }
+    .sanalyze:hover { background: #00e09a }
+    .sanalyze:disabled { background: rgba(255,255,255,0.1); color: var(--muted); cursor: not-allowed }
+    .serr { background: rgba(255,51,85,.08); border: 1px solid rgba(255,51,85,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #ff3355; display: none; margin-bottom: 10px }
+    .sspin { text-align: center; padding: 20px; color: var(--muted); font-size: 12px; display: none }
+    .sspin .spin2 { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #00ffaa; border-radius: 50%; animation: sp2 .8s linear infinite; margin: 0 auto 8px }
+    @keyframes sp2 { to { transform: rotate(360deg) } }
+    .sresult { display: none; animation: sfi .25s ease }
+    @keyframes sfi { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .ctable { width: 100%; border-collapse: collapse; font-size: 12px }
+    .ctable th { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border2); background: var(--bg) }
+    .ctable td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle }
+    .ctable tr:last-child td { border-bottom: none }
+    .ctable tr.rank1 { background: rgba(0,255,170,.05) }
+    .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 10px; font-weight: 700; flex-shrink: 0 }
+    .rb1 { background: rgba(0,255,170,.2); color: #00ffaa }
+    .rb2 { background: rgba(88,166,255,.15); color: #60a5fa }
+    .rb3 { background: rgba(255,255,255,.08); color: #8b94a3 }
+    .rb4, .rb5 { background: rgba(255,255,255,.05); color: #8b94a3 }
+    .bar-mini { height: 4px; border-radius: 2px; background: var(--border2); margin-top: 4px; overflow: hidden; min-width: 60px }
+    .bar-mini-fill { height: 100%; border-radius: 2px; transition: width .8s cubic-bezier(0.19,1,0.22,1) }
+    .compare-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px }
+    .cs-card { background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; padding: 12px; text-align: center }
+    .cs-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px }
+    .cs-val { font-size: 16px; font-weight: 800 }
+    .cs-sub { font-size: 10px; color: var(--muted); margin-top: 2px }
 
-    /* DATA ROWS */
-    .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border) }
-    .row:last-child { border: none }
-    .sym { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 14px }
-    .val { font-family: 'IBM Plex Mono', monospace; font-weight: 500 }
-    .physics { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase }
-    
-    .up { color: var(--green) }
-    .dn { color: var(--red) }
-    .bg-up { background: rgba(0,255,170,0.1); color: var(--green) }
-    .bg-dn { background: rgba(255,51,85,0.1); color: var(--red) }
+
+
+    /* ── TOOLTIPS ── */
+    .tip { position: relative; cursor: help; border-bottom: 1px dashed var(--muted) }
+    .tip::after { content: attr(data-tip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
+        background: #1e242b; color: var(--text); font-size: 11px; font-weight: 400; line-height: 1.5;
+        padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border2); white-space: nowrap;
+        max-width: 260px; white-space: normal; width: max-content; max-width: 240px;
+        opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 999; letter-spacing: 0 }
+    .tip:hover::after { opacity: 1 }
+    /* ── NAV SHELL ── */
+    .nav-shell { display: flex; gap: 0; background: var(--surface); border-bottom: 1px solid var(--border2); padding: 0 24px; position: sticky; top: 57px; z-index: 98 }
+    .nav-tab { padding: 10px 20px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: .2s; background: none; border-top: none; border-left: none; border-right: none }
+    .nav-tab:hover { color: var(--text) }
+    .nav-tab.active { color: var(--green); border-bottom-color: var(--green) }
+    .nav-panel { display: none }
+    .nav-panel.active { display: block }
+    /* ── SECTOR ROTATION ── */
+    .sec-wrap { padding: 0 24px 12px }
+    .sec-group-label { font-size: 10px; font-weight: 800; letter-spacing: 4px; color: var(--muted); margin: 24px 0 12px; display: flex; align-items: center; gap: 14px; text-transform: uppercase }
+    .sec-group-label::after { content: ""; height: 1px; background: var(--border); flex-grow: 1 }
+    .sec-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) }
+    .sec-tile { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 16px; position: relative; overflow: hidden; cursor: pointer; transition: border-color .2s }
+    .sec-tile:hover { border-color: rgba(255,255,255,0.25) }
+    .sec-tile-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px }
+    .sec-sym { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; color: #fff }
+    .sec-price-box { text-align: right; font-family: 'IBM Plex Mono', monospace }
+    .sec-price { font-size: 13px; font-weight: 600; color: #fff }
+    .sec-pct { font-size: 10px; font-weight: 700; margin-top: 2px }
+    .sec-vec-track { height: 3px; width: 100%; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin: 12px 0 }
+    .sec-vec-fill { height: 100%; width: 0%; transition: width 1.6s cubic-bezier(0.19,1,0.22,1) }
+    .sec-thrust-val { font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 700 }
+    .sec-thrust-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-top: 3px; font-weight: 700 }
+    .sec-badge { margin-top: 14px; padding: 9px; background: rgba(255,255,255,.03); font-size: 9px; font-family: 'IBM Plex Mono', monospace; font-weight: 700; letter-spacing: 3px; text-align: center }
+    .sec-tile-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 2px }
+
+    .sec-grid.compact { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) }
+    .sec-grid.compact .sec-tile { padding: 11px }
+    .sec-grid.compact .sec-sym { font-size: 14px }
+    .sec-grid.compact .sec-thrust-val { font-size: 20px }
+    .sec-grid.compact .sec-vec-track { margin: 8px 0 }
+    .sec-grid.compact .sec-badge { margin-top: 10px; padding: 7px; font-size: 8px }
+    .sec-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px }
+    .sec-mode-btns { display: flex; gap: 6px }
+    .sec-btn { background: var(--bg); border: 1px solid var(--border2); color: var(--muted); padding: 5px 14px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; border-radius: 4px; transition: .2s }
+    .sec-btn.active { color: var(--green); border-color: var(--green); background: rgba(0,255,170,.05) }
+    @keyframes flashU2 { 0%{color:var(--green)} 100%{color:#fff} }
+    @keyframes flashD2 { 0%{color:var(--red)} 100%{color:#fff} }
+    .fup { animation: flashU2 1s }
+    .fdn { animation: flashD2 1s }
     </style>
 </head>
 <body>
-
-<div class="topbar">
-    <div class="logo-box">
-        <div class="logo-icon">
-            <div style="width:4px;height:10px;background:#3b66f5;border-radius:1px"></div>
-            <div style="width:4px;height:18px;background:#4ba1ff;border-radius:1px"></div>
-            <div style="width:4px;height:24px;background:#00ffaa;border-radius:1px"></div>
+    <div class="topbar">
+        <div class="logo" style="display:flex;align-items:center;gap:10px">
+            <div style="width:32px;height:32px;background:#1a1e23;border-radius:6px;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding-bottom:6px;flex-shrink:0">
+                <div style="width:4px;height:8px;background:#3b66f5;border-radius:2px"></div>
+                <div style="width:4px;height:14px;background:#4ba1ff;border-radius:2px"></div>
+                <div style="width:4px;height:20px;background:#00ffaa;border-radius:2px"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;line-height:1">
+                <span style="font-size:16px;font-weight:900;letter-spacing:2px;color:#fff;font-family:'Inter',sans-serif">KINETIC</span>
+                <span style="font-size:9px;letter-spacing:.18em;color:#707a8a;text-transform:uppercase;margin-top:1px">Market Intelligence</span>
+            </div>
         </div>
-        <div style="display:flex;flex-direction:column;line-height:1">
-            <b style="font-size:16px;letter-spacing:2px">KINETIC 2.0</b>
-            <span style="font-size:9px;color:var(--muted);text-transform:uppercase">Intelligence Terminal</span>
-        </div>
-    </div>
-    <div class="status-group">
-        <div class="pill active"><span class="dot"></span><span id="market-status">REGIME: BULLISH</span></div>
-        <div class="pill"><span class="dot"></span><span id="market-phase">SCANNING...</span></div>
-    </div>
-</div>
-
-<div class="terminal-grid">
-    <div class="card">
-        <div class="ch"><span class="ct">Macro Velocity (Physics Layer)</span></div>
-        <div class="cb" id="macro-list">
-            <div class="row"><span>ANALYZING...</span></div>
+        <div class="top-pills">
+            <div class="pill ok"><span class="dot"></span><span id="regime-pill">Loading...</span></div>
+            <div class="pill warn"><span class="dot"></span>VIX 3M contango  Q3 caution</div>
+            <div class="pill" id="phase-pill"><span class="dot"></span><span id="phase-txt">Checking...</span></div>
+            <button class="btn" onclick="loadData()">Refresh</button>
         </div>
     </div>
-
-    <div class="card">
-        <div class="ch"><span class="ct">Sector Relative Strength</span></div>
-        <div class="cb" id="sector-list">
-            <div class="row"><span>ANALYZING...</span></div>
-        </div>
+    <div id="alert-bar" class="alert-bar"></div>
+    <nav class="nav-shell">
+        <button class="nav-tab active" onclick="showTab('macro')">Macro</button>
+        <button class="nav-tab" onclick="showTab('sectors')">Sectors</button>
+        <button class="nav-tab" onclick="showTab('compare')">Compare</button>
+        <button class="nav-tab" onclick="showTab('score')">Score</button>
+    </nav>
+    <div id="app">
+        <div class="loading"><div class="spin"></div>Loading live market data from Yahoo Finance...</div>
     </div>
-
-    <div class="card">
-        <div class="ch"><span class="ct">Volatility & Pressure</span></div>
-        <div class="cb" id="risk-list">
-            <div class="row"><span>ANALYZING...</span></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const CONFIG = {
-        macro: ['SPY', 'QQQ', 'IWM', 'DIA'],
-        sectors: ['XLK', 'XLF', 'XLE', 'XLV', 'XLI', 'XLY'],
-        risk: ['VIX', 'TNX', 'DXY', 'GLD']
+    <script>
+    const NAMES = {
+        SPY:'S&P 500',GLD:'Gold',TLT:'Long bond',HYG:'High yield',USO:'Crude oil',
+        XTN:'Transports',XLE:'Energy',XLF:'Financials',XLK:'Technology',XLU:'Utilities',
+        IWM:'Small cap',TIP:'TIPS',EEM:'Emerg markets',VNQ:'Real estate',VIX:'Volatility',
+        'CL=F':'Crude /CL','GC=F':'Gold /GC','ES=F':'S&P /ES','NQ=F':'Nasdaq /NQ','ZN=F':'10yr /ZN',
+        EWG:'Germany',EWU:'UK FTSE',FEZ:'Euro stoxx',EWJ:'Japan',EWY:'Korea',EWT:'Taiwan',EWH:'Hong Kong',INDA:'India'
     };
 
-    function getMarketPhase() {
-        const now = new Date();
-        const hrs = now.getHours();
-        const mins = now.getMinutes();
-        const time = hrs * 60 + mins;
-        if (time < 570) return "PREMARKET";
-        if (time < 600) return "OPENING VOL";
-        if (time < 960) return "CORE SESSION";
-        return "AFTER HOURS";
+    const SECTOR_MAP = {
+        XLK:  { name: 'Technology',   group: 'tactical'   },
+        XLE:  { name: 'Energy',       group: 'tactical'   },
+        XLC:  { name: 'Comm Svcs',    group: 'tactical'   },
+        XLRE: { name: 'Real Estate',  group: 'tactical'   },
+        XLU:  { name: 'Utilities',    group: 'structural' },
+        XLP:  { name: 'Staples',      group: 'structural' },
+        XLV:  { name: 'Health Care',  group: 'structural' },
+        XLF:  { name: 'Financials',   group: 'structural' },
+        XLI:  { name: 'Industrials',  group: 'structural' },
+        XLB:  { name: 'Materials',    group: 'structural' },
+        XLY:  { name: 'Cons Disc',    group: 'structural' }
+    };
+    const SECTORS = Object.keys(SECTOR_MAP);
+    const FORCE=['SPY','GLD','TLT','HYG','USO','XTN','XLE','XLF','XLK','XLU','IWM','TIP','EEM','VNQ'];
+    const FUTURES=['CL=F','GC=F','ES=F','NQ=F','ZN=F'];
+    const GLOBAL=['EWG','EWU','FEZ','EWJ','EWY','EWT','EWH','INDA'];
+    function getPhase(){
+        const et=new Date().toLocaleString('en-US',{timeZone:'America/New_York'});
+        const d=new Date(et),t=d.getHours()*60+d.getMinutes();
+        if(t<9*60+30)return{n:'Premarket',c:'',a:'Check ES NQ CL'};
+        if(t<9*60+45)return{n:'Avoid',c:'dng',a:'Do NOT trade'};
+        if(t<10*60+15)return{n:'First window',c:'act',a:'Enter breakouts now'};
+        if(t<11*60+30)return{n:'Calm zone',c:'',a:'Manage positions'};
+        if(t<12*60)return{n:'Pre-lunch',c:'cau',a:'Tighten stops'};
+        if(t<13*60)return{n:'Lunch effect',c:'dng',a:'Watch reversal'};
+        if(t<14*60+30)return{n:'Afternoon',c:'',a:'Hold only'};
+        if(t<15*60)return{n:'Power hour',c:'act',a:'Add confirmed units'};
+        if(t<16*60)return{n:'Closing',c:'act',a:'Ride or exit'};
+        return{n:'After hours',c:'',a:'Review model'};
     }
-
-    async function fetchPhysics(sym) {
-        try {
-            const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`);
-            const d = await r.json();
-            const p = d.chart.result[0].indicators.quote[0].close.filter(x => x != null);
-            
-            // Physics logic (Velocity/Acceleration/Jerk)
-            const v = ((p[p.length-1]-p[p.length-5])/p[p.length-5]*100);
-            const prevV = ((p[p.length-2]-p[p.length-6])/p[p.length-6]*100);
-            const a = v - prevV;
-            const jerk = a - (prevV - ((p[p.length-3]-p[p.length-7])/p[p.length-7]*100));
-            
-            return { sym, v: v.toFixed(2), a: a.toFixed(2), j: jerk.toFixed(2) };
-        } catch (e) { return null; }
+    function grade(s){
+        if(s>5)return{g:'A',c:'ga'};if(s>2)return{g:'B',c:'gb'};
+        if(s>0)return{g:'C',c:'gc'};if(s>-2)return{g:'D',c:'gd'};return{g:'F',c:'gf'};
     }
-
-    async function renderSection(id, list) {
-        const container = document.getElementById(id);
-        let html = '';
-        for (const sym of list) {
-            const data = await fetchPhysics(sym);
-            if (!data) continue;
-            const isUp = data.v >= 0;
-            html += `
-                <div class="row">
-                    <span class="sym">${sym}</span>
-                    <div style="display:flex; align-items:center; gap:8px">
-                        <span class="val ${isUp?'up':'dn'}">${data.v}%</span>
-                        <span class="physics ${data.a>=0?'bg-up':'bg-dn'}">${data.a > 0 ? 'ACCEL' : 'DECEL'}</span>
-                    </div>
-                </div>`;
+    function zsc(arr){
+        if(!arr||arr.length<25)return 0;
+        const vel=[];
+        for(let i=5;i<arr.length;i++)vel.push((arr[i]-arr[i-5])/arr[i-5]*100);
+        const w=vel.slice(-20),mn=w.reduce((a,b)=>a+b,0)/w.length;
+        const sd=Math.sqrt(w.reduce((a,b)=>a+(b-mn)**2,0)/w.length)||0.001;
+        const v=vel[vel.length-1],ac=vel.length>1?v-vel[vel.length-2]:0,jk=vel.length>2?ac-(vel[vel.length-2]-vel[vel.length-3]):0;
+        return parseFloat(((v-mn)/sd*0.30+(ac/sd)*0.36+(jk/sd)*0.34).toFixed(2));
+    }
+    function pct(arr,n=5){
+        if(!arr||arr.length<n+1)return 0;
+        return parseFloat(((arr[arr.length-1]-arr[arr.length-1-n])/arr[arr.length-1-n]*100).toFixed(2));
+    }
+    function pct1(arr){
+        if(!arr||arr.length<2)return 0;
+        return parseFloat(((arr[arr.length-1]-arr[arr.length-2])/arr[arr.length-2]*100).toFixed(2));
+    }
+    window._kCache = {};
+    function parseYahoo(j, sym){
+        const res=j.chart?.result?.[0]; if(!res) return null;
+        const q=res.indicators?.quote?.[0], meta=res.meta;
+        const close=(q?.close||[]).filter(v=>v!=null);
+        if(close.length<20) return null;
+        return {close, high:(q?.high||[]).filter(v=>v!=null),
+            low:(q?.low||[]).filter(v=>v!=null),
+            volume:(q?.volume||[]).filter(v=>v!=null),
+            price:meta?.regularMarketPrice||close[close.length-1]||0,
+            name:meta?.shortName||sym};
+    }
+    async function fetch1(sym){
+        const yUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=3mo`;
+        // 1. Direct Yahoo
+        try{
+            const r=await fetch(yUrl);
+            if(r.ok){ const d=parseYahoo(await r.json(),sym); if(d){window._kCache[sym]=d;return d.close;} }
+        }catch(e){}
+        // 2. allorigins proxy (bypasses CORS for file:// protocol)
+        try{
+            const r=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`);
+            if(r.ok){ const w=await r.json(); const d=parseYahoo(JSON.parse(w.contents),sym); if(d){window._kCache[sym]=d;return d.close;} }
+        }catch(e){}
+        // 3. corsproxy.io
+        try{
+            const r=await fetch(`https://corsproxy.io/?${encodeURIComponent(yUrl)}`);
+            if(r.ok){ const d=parseYahoo(await r.json(),sym); if(d){window._kCache[sym]=d;return d.close;} }
+        }catch(e){}
+        return[];
+    }
+    let currentSort = 'z';
+    async function loadData(){
+        document.getElementById('app').innerHTML='<div class="loading"><div class="spin"></div>Loading live data...</div>';
+        const syms=[...FORCE,'^VIX',...FUTURES,...GLOBAL,...SECTORS];
+        const all={};
+        await Promise.all(syms.map(async s=>{all[s]=await fetch1(s)}));
+        const scores={};
+        for(const t of FORCE)scores[t]=zsc(all[t]);
+        scores['VIX']=zsc(all['^VIX']);
+        const futV={},globV={};
+        for(const t of FUTURES)futV[t]=pct(all[t],5);
+        for(const t of GLOBAL)globV[t]=pct1(all[t]);
+        const vArr=all['^VIX']||[];
+        const vNow=vArr.length?parseFloat(vArr[vArr.length-1].toFixed(2)):0;
+        const vVel=pct(vArr,5);
+        const regime=vNow<18?'Bull low vol':vNow<25?'Sideways':'Bear high vol';
+        const rCls=vNow<18?'g':vNow<25?'a':'r';
+        const stayP=vNow<18?94.7:vNow<25?68.0:42.0;
+        const advP=vNow<18?5.3:vNow<25?32.0:58.0;
+        const deploy=advP<10?'Full deployment':advP<30?'Half deployment':'Defensive';
+        document.getElementById('regime-pill').textContent=`${regime}  |  Stable ${stayP}%`;
+        const ph=getPhase();
+        document.getElementById('phase-txt').textContent=ph.n;
+        const now=new Date();
+        const ts=now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'America/New_York'})+' ET';
+        const sorted=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+        const longs=sorted.filter(([,s])=>s>1);
+        const shorts=sorted.filter(([,s])=>s<-1).reverse();
+        if(vNow>20&&Math.abs(vVel)>15){
+            const bar=document.getElementById('alert-bar');
+            bar.textContent='REGIME CHANGE ALERT — VIX above 20 with elevated velocity — reduce exposure immediately';
+            bar.classList.add('show');
         }
-        container.innerHTML = html;
-    }
+        function srow(t,s){
+            const sc=s>0?'g':s<0?'r':'m';
+            const{g,c}=grade(s);
+            const action=s>2?'Deploy':s>1?'Watch+':s>0?'Watch':s>-2?'Avoid':'Avoid';
+            const ac=s>2?'g':s>0?'a':'r';
+            const tip=`Z-score ${s>0?'+':''}${s}: price momentum is ${Math.abs(s).toFixed(1)} standard deviations ${s>=0?'above':'below'} its recent average. ${s>2?'Strong signal — deploy capital.':s>1?'Positive momentum — watch for entry.':s>0?'Weak positive — monitor only.':s>-2?'Negative momentum — avoid new positions.':'Strong negative — consider hedge.'}`;
+            return`<div class="crow"><div class="cleft"><span class="ctick">${t}</span><span class="cname">${NAMES[t]||t}</span></div><div class="cright"><span class="cval ${sc} tip" data-tip="${tip}" style="cursor:help;border-bottom:1px dashed var(--muted)">${s>0?'+':''}${s}</span><span class="gpill ${c}">${g}</span><span class="gpill ${ac}" style="min-width:52px;text-align:center">${action}</span></div></div>`;
+        }
+        function grow(t,v){
+            const pc=v>0.5?'gup':v<-0.5?'gdn':'gne';
+            const lbl=v>0.5?'Risk on':v<-0.5?'Risk off':'Neutral';
+            return`<div class="crow"><span class="cname">${NAMES[t]||t}</span><span class="globe-pill ${pc}">${v>0?'+':''}${v.toFixed(2)}%  ${lbl}</span></div>`;
+        }
+        const divs=[
+            ['Oil vs transports',(scores.USO||0)-(scores.XTN||0)],
+            ['XTN vs XLE',(scores.XTN||0)-(scores.XLE||0)],
+            ['VIX vs SPY',(scores.VIX||0)-(scores.SPY||0)],
+            ['GLD vs VIX',(scores.GLD||0)-(scores.VIX||0)],
+            ['IWM vs SPY',(scores.IWM||0)-(scores.SPY||0)],
+            ['HYG vs SPY',(scores.HYG||0)-(scores.SPY||0)],
+        ].sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+        const DIV_TIPS = {
+            'Oil vs transports': 'Oil rising faster than transports signals energy cost pressure. Negative = transports outpacing oil — healthy growth signal.',
+            'XTN vs XLE': 'Transports vs Energy spread. Positive = transports leading — expansion signal. Negative = energy leading — inflationary pressure.',
+            'VIX vs SPY': 'Volatility vs equity spread. Negative = SPY stronger — risk-on, deploy. Positive = VIX rising faster — reduce exposure.',
+            'GLD vs VIX': 'Gold vs volatility spread. Positive = gold outpacing fear — macro uncertainty or dollar weakness signal.',
+            'IWM vs SPY': 'Small cap vs large cap spread. Positive = risk-on rotation — bull confirmation. Negative = flight to large cap safety.',
+            'HYG vs SPY': 'Credit vs equity spread. Positive = aligned risk appetite. Negative = credit weakening before equities — early warning.',
+        };
+        const DIV_ACTION = (l,v) => {
+            if(l==='VIX vs SPY') return v<-1?{a:'Risk-on',c:'g'}:v>1?{a:'Reduce',c:'r'}:{a:'Neutral',c:'gc'};
+            if(l==='HYG vs SPY') return v>0.5?{a:'Confirm',c:'g'}:v<-0.5?{a:'Warning',c:'r'}:{a:'Neutral',c:'gc'};
+            if(l==='IWM vs SPY') return v>0.5?{a:'Bull',c:'g'}:v<-0.5?{a:'Caution',c:'r'}:{a:'Neutral',c:'gc'};
+            return Math.abs(v)>3?{a:'Elevated',c:'gd'}:{a:'Normal',c:'gc'};
+        };
+        function drow([l,v]){
+            const c=v>0?'g':'r';
+            const tip=DIV_TIPS[l]||'Cross-asset momentum divergence. High values signal potential rotation or stress.';
+            const {a,c:ac}=DIV_ACTION(l,v);
+            return`<div class="divrow"><span class="cname tip" data-tip="${tip}" style="cursor:help;border-bottom:1px dashed var(--muted)">${l}</span><div style="display:flex;align-items:center;gap:7px"><span class="cval ${c} tip" data-tip="Divergence score: ${v>0?'+':''}${v.toFixed(2)} standard deviation spread between the two assets." style="cursor:help;border-bottom:1px dashed var(--muted)">${v>0?'+':''}${v.toFixed(2)}</span><span class="gpill ${ac}" style="min-width:52px;text-align:center">${a}</span></div></div>`;
+        }
+        function tslot(time,name,note,cls,nc){
+            return`<div class="ts ${cls}"><div class="ts-t">${time}</div><div class="ts-n ${nc}">${name}</div><div class="ts-d">${note}</div></div>`;
+        }
+        function cconv(ticker,dir,detail,layers,strong){
+            const tc=dir==='Long'?'g':dir==='Short'?'r':'a';
+            const dc=dir==='Long'?'dlong':dir==='Short'?'dshort':'dwait';
+            return`<div class="conv-row"><span class="cticker ${tc}">${ticker}</span><span class="cdir ${dc}">${dir}</span><span class="cdetail">${detail}</span><span class="clayers ${strong?'s':'w'}">${layers}</span></div>`;
+        }
 
-    async function init() {
-        document.getElementById('market-phase').innerText = getMarketPhase();
-        await renderSection('macro-list', CONFIG.macro);
-        await renderSection('sector-list', CONFIG.sectors);
-        await renderSection('risk-list', CONFIG.risk);
-    }
-
-    init();
-    setInterval(init, 60000);
-</script>
-
-</body>
-</html>
+        // ── Sector scores using same calcZ engine ──
+        window.sectorData = {};
+        for (const t of SECTORS) {
+            const arr = all[t] || [];
+            const z = zsc(arr);
+            const price = arr.length ? arr[arr.length-1] : 0;
+            const chg = arr.length > 1 ? parseFloat(((arr[arr.length-1]-arr[arr.length-2])/arr[arr.length-2]*100).toFixed(2)) : 0;
+            const state = z > 1.0 ? 'EXPAN
