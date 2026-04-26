@@ -4,76 +4,159 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <title>KINETIC // MARKET INTELLIGENCE TERMINAL</title>
+    <title>KINETIC 2.0 — Market Intelligence Terminal</title>
     <style>
     * { box-sizing: border-box; margin: 0; padding: 0 }
     :root {
         --bg: #0b0e11;
         --surface: #14171a;
         --border: rgba(255,255,255,0.06);
-        --border2: rgba(255,255,255,0.12);
+        --border2: rgba(255,255,255,0.1);
         --green: #00ffaa;
         --red: #ff3355;
+        --blue: #58a6ff;
         --text: #ffffff;
         --muted: #707a8a;
+        --dim: #8b94a3;
     }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; font-size: 13px; overflow-x: hidden }
     
-    /* HEADER STRUCTURE */
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 100 }
-    .logo { font-weight: 900; letter-spacing: 2px; font-size: 18px; display: flex; align-items: center; gap: 10px }
-    .logo span { color: var(--green) }
+    /* TOPBAR LOGIC */
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border2); position: sticky; top: 0; z-index: 100 }
+    .logo-box { display: flex; align-items: center; gap: 10px }
+    .logo-icon { width: 32px; height: 32px; background: #1a1e23; border-radius: 6px; display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding-bottom: 6px }
     
-    .status-pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 6px 14px; font-size: 10px; font-weight: 800; color: var(--muted); display: flex; align-items: center; gap: 8px; letter-spacing: 1px }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green) }
+    .status-group { display: flex; gap: 12px }
+    .pill { background: var(--bg); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600; color: var(--dim); display: flex; align-items: center; gap: 6px }
+    .pill.active { border-color: rgba(0,255,170,0.3); color: var(--green); background: rgba(0,255,170,0.06) }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
 
-    /* GRID SYSTEM */
-    .terminal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; padding: 24px }
-    .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4) }
-    .ch { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02) }
-    .ct { font-size: 10px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px }
-    .cb { padding: 8px 20px 20px }
+    /* MAIN LAYOUT */
+    .terminal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; padding: 16px 24px }
+    .card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden }
+    .ch { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center }
+    .ct { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px }
+    .cb { padding: 8px 16px 16px }
 
     /* DATA ROWS */
-    .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border) }
+    .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border) }
     .row:last-child { border: none }
-    .sym { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 15px }
-    .val { font-family: 'IBM Plex Mono', monospace; font-weight: 600 }
+    .sym { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 14px }
+    .val { font-family: 'IBM Plex Mono', monospace; font-weight: 500 }
+    .physics { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase }
     
-    .badge { font-size: 9px; font-weight: 900; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px }
-    .up { color: var(--green) } .dn { color: var(--red) }
-    .bg-up { background: rgba(0,255,170,0.1); color: var(--green); border: 1px solid rgba(0,255,170,0.2) }
-    .bg-dn { background: rgba(255,51,85,0.1); color: var(--red); border: 1px solid rgba(255,51,85,0.2) }
+    .up { color: var(--green) }
+    .dn { color: var(--red) }
+    .bg-up { background: rgba(0,255,170,0.1); color: var(--green) }
+    .bg-dn { background: rgba(255,51,85,0.1); color: var(--red) }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="logo">KINETIC <span>//</span> 2.0</div>
-    <div class="status-pill"><span class="status-dot"></span><span id="market-phase">SYSTEM ONLINE</span></div>
+<div class="topbar">
+    <div class="logo-box">
+        <div class="logo-icon">
+            <div style="width:4px;height:10px;background:#3b66f5;border-radius:1px"></div>
+            <div style="width:4px;height:18px;background:#4ba1ff;border-radius:1px"></div>
+            <div style="width:4px;height:24px;background:#00ffaa;border-radius:1px"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;line-height:1">
+            <b style="font-size:16px;letter-spacing:2px">KINETIC 2.0</b>
+            <span style="font-size:9px;color:var(--muted);text-transform:uppercase">Intelligence Terminal</span>
+        </div>
+    </div>
+    <div class="status-group">
+        <div class="pill active"><span class="dot"></span><span id="market-status">REGIME: BULLISH</span></div>
+        <div class="pill"><span class="dot"></span><span id="market-phase">SCANNING...</span></div>
+    </div>
 </div>
 
 <div class="terminal-grid">
     <div class="card">
-        <div class="ch"><span class="ct">Macro Velocity // 5D</span></div>
+        <div class="ch"><span class="ct">Macro Velocity (Physics Layer)</span></div>
         <div class="cb" id="macro-list">
-            <div class="row"><span>Synchronizing Physics...</span></div>
+            <div class="row"><span>ANALYZING...</span></div>
         </div>
     </div>
 
     <div class="card">
-        <div class="ch"><span class="ct">Sector Momentum // Acceleration</span></div>
+        <div class="ch"><span class="ct">Sector Relative Strength</span></div>
         <div class="cb" id="sector-list">
-            <div class="row"><span>Synchronizing Physics...</span></div>
+            <div class="row"><span>ANALYZING...</span></div>
         </div>
     </div>
 
     <div class="card">
-        <div class="ch"><span class="ct">Systemic Volatility // Pressure</span></div>
+        <div class="ch"><span class="ct">Volatility & Pressure</span></div>
         <div class="cb" id="risk-list">
-            <div class="row"><span>Synchronizing Physics...</span></div>
+            <div class="row"><span>ANALYZING...</span></div>
         </div>
     </div>
 </div>
 
 <script>
+    const CONFIG = {
+        macro: ['SPY', 'QQQ', 'IWM', 'DIA'],
+        sectors: ['XLK', 'XLF', 'XLE', 'XLV', 'XLI', 'XLY'],
+        risk: ['VIX', 'TNX', 'DXY', 'GLD']
+    };
+
+    function getMarketPhase() {
+        const now = new Date();
+        const hrs = now.getHours();
+        const mins = now.getMinutes();
+        const time = hrs * 60 + mins;
+        if (time < 570) return "PREMARKET";
+        if (time < 600) return "OPENING VOL";
+        if (time < 960) return "CORE SESSION";
+        return "AFTER HOURS";
+    }
+
+    async function fetchPhysics(sym) {
+        try {
+            const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`);
+            const d = await r.json();
+            const p = d.chart.result[0].indicators.quote[0].close.filter(x => x != null);
+            
+            // Physics logic (Velocity/Acceleration/Jerk)
+            const v = ((p[p.length-1]-p[p.length-5])/p[p.length-5]*100);
+            const prevV = ((p[p.length-2]-p[p.length-6])/p[p.length-6]*100);
+            const a = v - prevV;
+            const jerk = a - (prevV - ((p[p.length-3]-p[p.length-7])/p[p.length-7]*100));
+            
+            return { sym, v: v.toFixed(2), a: a.toFixed(2), j: jerk.toFixed(2) };
+        } catch (e) { return null; }
+    }
+
+    async function renderSection(id, list) {
+        const container = document.getElementById(id);
+        let html = '';
+        for (const sym of list) {
+            const data = await fetchPhysics(sym);
+            if (!data) continue;
+            const isUp = data.v >= 0;
+            html += `
+                <div class="row">
+                    <span class="sym">${sym}</span>
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <span class="val ${isUp?'up':'dn'}">${data.v}%</span>
+                        <span class="physics ${data.a>=0?'bg-up':'bg-dn'}">${data.a > 0 ? 'ACCEL' : 'DECEL'}</span>
+                    </div>
+                </div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    async function init() {
+        document.getElementById('market-phase').innerText = getMarketPhase();
+        await renderSection('macro-list', CONFIG.macro);
+        await renderSection('sector-list', CONFIG.sectors);
+        await renderSection('risk-list', CONFIG.risk);
+    }
+
+    init();
+    setInterval(init, 60000);
+</script>
+
+</body>
+</html>
