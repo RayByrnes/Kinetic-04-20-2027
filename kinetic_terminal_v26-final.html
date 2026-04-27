@@ -400,7 +400,6 @@
     }
     let currentSort = 'z';
     async function loadData(){
-        try {
         document.getElementById('app').innerHTML='<div class="loading"><div class="spin"></div>Loading live data...</div>';
         const syms=[...FORCE,'^VIX',...FUTURES,...GLOBAL,...SECTORS];
         const all={};
@@ -665,8 +664,6 @@
                 el.classList.add(move > 0 ? 'fup' : 'fdn');
             }
         }, 2800);
-    }
-        } catch(e) { console.warn('loadData error:', e); }
     }
     loadData();
     setInterval(loadData,15*60*1000);
