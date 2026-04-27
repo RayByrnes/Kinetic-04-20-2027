@@ -400,6 +400,7 @@
     }
     let currentSort = 'z';
     async function loadData(){
+        try {
         document.getElementById('app').innerHTML='<div class="loading"><div class="spin"></div>Loading live data...</div>';
         const syms=[...FORCE,'^VIX',...FUTURES,...GLOBAL,...SECTORS];
         const all={};
@@ -664,6 +665,8 @@
                 el.classList.add(move > 0 ? 'fup' : 'fdn');
             }
         }, 2800);
+    }
+        } catch(e) { console.warn('loadData error:', e); }
     }
     loadData();
     setInterval(loadData,15*60*1000);
@@ -975,7 +978,7 @@
         if (tab === 'heatmap') {
             const hp = document.getElementById('panel-heatmap');
             hp.style.display = 'flex'; hp.classList.add('hm-active');
-            setTimeout(hmDraw, 50);
+            setTimeout(() => { hmBuildSectorPills(); hmDraw(); }, 50);
         }
         if (tab === 'compare') { document.getElementById('panel-compare').style.display = 'block'; setTimeout(()=>document.getElementById('c1')?.focus(),100); }
         if (tab === 'score')   { document.getElementById('panel-compare').style.display = 'block'; setTimeout(()=>{ const sp=document.getElementById('s-in'); if(sp){sp.scrollIntoView({behavior:'smooth'});sp.focus();} },100); }
@@ -1298,13 +1301,13 @@
     // ════════════════════════════════════════════════════════════
     // STATE
     // ════════════════════════════════════════════════════════════
-    let currentIndex   = 'SP500';
-    let currentSector  = 'ALL';
-    let currentColor   = 'z';
-    let zoomedSector   = null;
-    let equalSize      = false;
+    let hmCurrentIndex = 'SP500';
+    let hmCurrentSector = 'ALL';
+    let hmCurrentColor = 'z';
+    let hmZoomedSector = null;
+    let hmEqualSize = false;
     
-    const INDEX_NAMES = {
+    const HM_INDEX_NAMES = {
       DOW:'Dow Jones 30', SP500:'S&P 500', NDX:'Nasdaq 100', RUT:'Russell 2000', SP100:'S&P 100'
     };
     
@@ -1346,7 +1349,7 @@
     }
     
     function getColor(d) {
-      return currentColor === 'z' ? zColor(d.data.z) : chgColor(d.data.c);
+      return hmCurrentColor === 'z' ? zColor(d.data.z) : chgColor(d.data.c);
     }
     
     // ════════════════════════════════════════════════════════════
@@ -1362,7 +1365,7 @@
       bar.innerHTML = '';
       sectors.forEach(s => {
         const btn = document.createElement('button');
-        btn.className = 'hm-sec' + (s === currentSector ? ' active' : '');
+        btn.className = 'hm-sec' + (s === hmCurrentSector ? ' active' : '');
         btn.textContent = s === 'ALL' ? 'All Sectors' : s;
         btn.onclick = () => hmSetSector(s);
         bar.appendChild(btn);
@@ -1370,8 +1373,8 @@
     }
     
     function hmGetData() {
-      let data = STOCKS[currentIndex] || [];
-      if (currentSector !== 'ALL') data = data.filter(d => d.s === currentSector);
+      let data = STOCKS[hmCurrentIndex] || [];
+      if (hmCurrentSector !== 'ALL') data = data.filter(d => d.s === hmCurrentSector);
       return data;
     }
     
@@ -1382,23 +1385,25 @@
       const sectors = {};
       data.forEach(d => {
         if (!sectors[d.s]) sectors[d.s] = {name: d.s, children: []};
-        sectors[d.s].children.push({...d, value: equalSize ? 1 : d.mc});
+        sectors[d.s].children.push({...d, value: hmEqualSize ? 1 : d.mc});
       });
       return {name: 'root', children: Object.values(sectors)};
     }
     
     function hmDraw() {
+      if (typeof d3 === 'undefined') return;
       const svg = d3.select('#hm-svg');
+      if (!svg.node() || !svg.node().parentElement) return;
       svg.selectAll('*').remove();
     
-      const W = svg.node().parentElement.clientWidth;
-      const H = svg.node().parentElement.clientHeight;
+      const W = svg.node().parentElement.clientWidth || window.innerWidth;
+      const H = svg.node().parentElement.clientHeight || (window.innerHeight - 150);
       svg.attr('width', W).attr('height', H);
     
       const data = hmGetData();
       if (!data.length) return;
     
-      const singleSector = currentSector !== 'ALL';
+      const singleSector = hmCurrentSector !== 'ALL';
       const root = d3.hierarchy(hmBuildHierarchy(data))
         .sum(d => d.value || 0)
         .sort((a,b) => b.value - a.value);
@@ -1451,7 +1456,7 @@
         .on('mousemove', hmShowTip)
         .on('mouseleave', hideTip)
         .on('click', (e,d) => {
-          if (currentSector === 'ALL') hmSetSector(d.data.s);
+          if (hmCurrentSector === 'ALL') hmSetSector(d.data.s);
         });
     
       g.append('rect')
@@ -1524,7 +1529,7 @@
       const maxZ = Math.max(...data.map(d=>d.z)).toFixed(1);
       const minZ = Math.min(...data.map(d=>d.z)).toFixed(1);
     
-      document.getElementById('hm-sb-uni').textContent = INDEX_NAMES[currentIndex] || currentIndex;
+      document.getElementById('hm-sb-uni').textContent = HM_INDEX_NAMES[hmCurrentIndex] || hmCurrentIndex;
       document.getElementById('hm-sb-adv').textContent = adv;
       document.getElementById('hm-sb-dec').textContent = dec;
       const avgEl = document.getElementById('hm-sb-avgz');
@@ -1537,7 +1542,7 @@
     // ════════════════════════════════════════════════════════════
     // TOOLTIP
     // ════════════════════════════════════════════════════════════
-    const tip = document.getElementById('hm-tip');
+    const hmTip = document.getElementById('hm-tip');
     function hmShowTip(event, d) {
       const zc = d.data.z >= 0 ? 'var(--green)' : '#ff7799';
       const cc = d.data.c >= 0 ? 'var(--green)' : 'var(--red)';
@@ -1550,47 +1555,47 @@
       document.getElementById('htt-c').style.color   = cc;
       document.getElementById('htt-mc').textContent  = '$' + d.data.mc.toFixed(0) + 'B';
       document.getElementById('htt-sec').textContent = d.data.s;
-      document.getElementById('htt-idx').textContent = INDEX_NAMES[currentIndex];
+      document.getElementById('htt-idx').textContent = HM_INDEX_NAMES[hmCurrentIndex];
       const tx = Math.min(event.clientX + 14, window.innerWidth  - 205);
       const ty = Math.min(event.clientY - 10, window.innerHeight - 220);
-      tip.style.left = tx + 'px';
-      tip.style.top  = ty + 'px';
-      tip.classList.add('vis');
+      hmTip.style.left = tx + 'px';
+      hmTip.style.top  = ty + 'px';
+      hmTip.classList.add('vis');
     }
-    function hmHideTip() { tip.classList.remove('vis'); }
+    function hmHideTip() { hmTip.classList.remove('vis'); }
     
     // ════════════════════════════════════════════════════════════
     // CONTROLS
     // ════════════════════════════════════════════════════════════
     function hmSetIdx(idx) {
-      currentIndex  = idx;
-      currentSector = 'ALL';
-      zoomedSector  = null;
+      hmCurrentIndex  = idx;
+      hmCurrentSector = 'ALL';
+      hmZoomedSector  = null;
       document.querySelectorAll('.hm-idx').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
-      document.getElementById('hm-bc-idx').innerHTML  = INDEX_NAMES[idx];
+      document.getElementById('hm-bc-idx').innerHTML  = HM_INDEX_NAMES[idx];
       document.getElementById('hm-bc-sec').textContent = 'All Sectors';
       hmBuildSectorPills();
       hmDraw();
     }
     
     function hmSetSector(s) {
-      currentSector = s;
+      hmCurrentSector = s;
       document.querySelectorAll('.hm-sec').forEach(b => {
-        b.classList.toggle('active', b.textContent === (s==='ALL'?'All Sectors':s));
+        b.classList.toggle('active', b.textContent === (s==='ALL'?'All Sectors':s) && b.classList.contains('hm-sec'));
       });
       document.getElementById('hm-bc-sec').textContent = s === 'ALL' ? 'All Sectors' : s;
       hmDraw();
     }
     
     function hmReset() {
-      currentSector = 'ALL';
+      hmCurrentSector = 'ALL';
       hmBuildSectorPills();
       hmDraw();
     }
     
     function hmColor(mode, btn) {
-      currentColor = mode;
+      hmCurrentColor = mode;
       document.querySelectorAll('#controls-right .hm-btn').forEach(b => {
         if (b.id === 'cbtn-z' || b.id === 'cbtn-chg') b.classList.remove('active');
       });
@@ -1599,9 +1604,9 @@
     }
     
     function hmEqSize(btn) {
-      equalSize = !equalSize;
-      btn.classList.toggle('active', equalSize);
-      btn.textContent = equalSize ? 'Equal Size' : 'By MCap';
+      hmEqualSize = !hmEqualSize;
+      btn.classList.toggle('active', hmEqualSize);
+      btn.textContent = hmEqualSize ? 'Equal Size' : 'By MCap';
       hmDraw();
     }
     
